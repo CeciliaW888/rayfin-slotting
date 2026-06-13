@@ -1,43 +1,35 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { KpiPanel } from '@/components/KpiPanel';
+import { SimulationControls } from '@/components/SimulationControls';
 import { ViewControls } from '@/components/ViewControls';
 import { WorstSlottedList } from '@/components/WorstSlottedList';
 import { useAuth } from '@/hooks/AuthContext';
+import { useSlotting } from '@/hooks/useSlotting';
 import { WarehouseScene } from '@/scene/WarehouseScene';
 import { slotColors, type ViewMode } from '@/slotting/colors';
-import { computeMetrics, type Metrics } from '@/slotting/metrics';
-import type { SkuRow, SlotRow } from '@/slotting/types';
-import { getSkus, getSlots, seedIfEmpty } from '@/services/slotting';
 
 export function HomePage() {
   const { signOut, user } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [slots, setSlots] = useState<SlotRow[]>([]);
-  const [skus, setSkus] = useState<SkuRow[]>([]);
-  const [metrics, setMetrics] = useState<Metrics | null>(null);
+  const {
+    loading,
+    skus,
+    displaySlots,
+    metrics,
+    baselineMetrics,
+    isSimulating,
+    applying,
+    simulate,
+    revert,
+    apply,
+  } = useSlotting();
+
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('abc');
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      await seedIfEmpty();
-      const [slotRows, skuRows] = await Promise.all([getSlots(), getSkus()]);
-      if (cancelled) return;
-      setSlots(slotRows);
-      setSkus(skuRows);
-      setMetrics(computeMetrics(slotRows, skuRows));
-      setLoading(false);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   const colorById = useMemo(
-    () => slotColors(slots, skus, viewMode),
-    [slots, skus, viewMode]
+    () => slotColors(displaySlots, skus, viewMode),
+    [displaySlots, skus, viewMode]
   );
 
   return (
@@ -64,13 +56,27 @@ export function HomePage() {
         <div className="flex-1 flex min-h-0">
           <div className="flex-1 min-w-0">
             <WarehouseScene
-              slots={slots}
+              slots={displaySlots}
               colorById={colorById}
               selectedSlotId={selectedSlotId}
               onSelectSlot={setSelectedSlotId}
             />
           </div>
           <aside className="w-96 shrink-0 border-l border-gray-200 bg-gray-50 overflow-y-auto p-5 space-y-6">
+            <section>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
+                What-if
+              </h2>
+              <SimulationControls
+                baseline={baselineMetrics}
+                projected={metrics}
+                isSimulating={isSimulating}
+                applying={applying}
+                onSimulate={simulate}
+                onApply={() => void apply()}
+                onRevert={revert}
+              />
+            </section>
             <section>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
                 View
