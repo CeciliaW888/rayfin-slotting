@@ -22,6 +22,7 @@ export default defineConfig({
       'three',
       '@react-three/fiber',
       'three/examples/jsm/controls/OrbitControls.js',
+      'three/examples/jsm/controls/PointerLockControls.js',
     ],
     esbuildOptions: {
       target: 'es2022',

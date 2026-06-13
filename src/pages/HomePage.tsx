@@ -2,18 +2,36 @@ import { useMemo, useState } from 'react';
 
 import { ImportControls } from '@/components/ImportControls';
 import { IntelligenceSummary } from '@/components/IntelligenceSummary';
+import { ItemsTable } from '@/components/ItemsTable';
 import { KpiPanel } from '@/components/KpiPanel';
+import { ModuleNav, type ModuleId } from '@/components/ModuleNav';
 import { RecommendationsPanel } from '@/components/RecommendationsPanel';
 import { SimulationControls } from '@/components/SimulationControls';
-import { ViewControls } from '@/components/ViewControls';
+import { SlotsTable } from '@/components/SlotsTable';
+import { TwinPanel } from '@/components/TwinPanel';
 import { WorstSlottedList } from '@/components/WorstSlottedList';
-import { useAuth } from '@/hooks/AuthContext';
 import { useSlotting } from '@/hooks/useSlotting';
-import { WarehouseScene } from '@/scene/WarehouseScene';
 import { slotColors, type ViewMode } from '@/slotting/colors';
 
+function ModuleHeader({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="border-b border-gray-200 bg-white px-5 py-3">
+      <h2 className="text-sm font-bold text-gray-900">{title}</h2>
+      <p className="text-xs text-gray-500">{subtitle}</p>
+    </div>
+  );
+}
+
+function ComingSoon({ title }: { title: string }) {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-1 text-center text-gray-400">
+      <p className="text-sm font-medium text-gray-500">{title}</p>
+      <p className="text-xs">On the roadmap — see the digital-twin plan.</p>
+    </div>
+  );
+}
+
 export function HomePage() {
-  const { signOut, user } = useAuth();
   const {
     loading,
     skus,
@@ -31,6 +49,7 @@ export function HomePage() {
     importCsv,
   } = useSlotting();
 
+  const [active, setActive] = useState<ModuleId>('twin');
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('abc');
 
@@ -40,24 +59,17 @@ export function HomePage() {
   );
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 md:h-screen">
-      <header className="flex items-start justify-between gap-4 border-b border-gray-200 bg-white px-4 py-4 sm:px-6 md:items-center md:px-8">
+    <div className="flex h-screen flex-col bg-gray-50">
+      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-gray-200 bg-white px-4 py-3 sm:px-6">
         <div className="min-w-0">
-          <h1 className="text-lg font-bold text-gray-900 sm:text-xl">Rayfin Slotting AI Twin</h1>
-          <p className="mt-1 text-xs text-gray-500">
-            Dynamic recommendations using velocity, forecast, affinity, cube and fit rules
+          <h1 className="text-base font-bold text-gray-900 sm:text-lg">Rayfin Slotting · DC Digital Twin</h1>
+          <p className="hidden text-xs text-gray-500 sm:block">
+            OptiSlot-style workstation — velocity, forecast, affinity, cube &amp; fit-aware slotting
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-3">
-          {user?.email && <span className="hidden text-sm text-gray-600 sm:inline">{user.email}</span>}
-          <button
-            onClick={() => void signOut()}
-            className="text-sm text-gray-400 transition-colors hover:text-gray-600"
-            aria-label="Sign out"
-          >
-            Sign out
-          </button>
-        </div>
+        <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+          Demo data
+        </span>
       </header>
 
       {loading || !metrics ? (
@@ -65,78 +77,107 @@ export function HomePage() {
           Building your distribution centre…
         </div>
       ) : (
-        <div className="flex flex-1 flex-col overflow-x-hidden md:min-h-0 md:flex-row">
-          <div className="h-[42vh] min-h-[280px] w-full shrink-0 md:h-auto md:min-h-0 md:flex-1">
-            <WarehouseScene
-              slots={displaySlots}
-              colorById={colorById}
-              selectedSlotId={selectedSlotId}
-              onSelectSlot={setSelectedSlotId}
-            />
-          </div>
-          <aside className="w-full shrink-0 space-y-6 border-t border-gray-200 bg-gray-50 p-4 md:w-96 md:overflow-y-auto md:border-l md:border-t-0 md:p-5">
-            <section>
-              <IntelligenceSummary recommendations={recommendations} skus={skus} />
-            </section>
-            <section>
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
-                What-if
-              </h2>
-              <SimulationControls
-                baseline={baselineMetrics}
-                projected={metrics}
-                isSimulating={isSimulating}
-                applying={applying}
-                onSimulate={simulate}
-                onApply={() => void apply()}
-                onRevert={revert}
-              />
-            </section>
-            <section>
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
-                View
-              </h2>
-              <ViewControls mode={viewMode} onChange={setViewMode} />
-            </section>
-            <section>
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
-                Data
-              </h2>
-              <ImportControls
-                importing={importing}
-                error={importError}
-                onImport={(file) => void importCsv(file)}
-              />
-            </section>
-            <section>
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
-                Slotting KPIs
-              </h2>
-              <KpiPanel metrics={metrics} />
-            </section>
-            <section>
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
-                AI move recommendations
-              </h2>
-              <RecommendationsPanel
-                recommendations={recommendations}
-                skus={skus}
+        <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+          <ModuleNav active={active} onSelect={setActive} />
+
+          <main className="min-h-0 flex-1 overflow-hidden">
+            {active === 'twin' && (
+              <TwinPanel
                 slots={displaySlots}
+                skus={skus}
+                colorById={colorById}
+                viewMode={viewMode}
+                onViewMode={setViewMode}
                 selectedSlotId={selectedSlotId}
                 onSelectSlot={setSelectedSlotId}
               />
-            </section>
-            <section>
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
-                Worst-slotted SKUs
-              </h2>
-              <WorstSlottedList
-                entries={metrics.worst}
-                selectedSlotId={selectedSlotId}
-                onSelectSlot={setSelectedSlotId}
-              />
-            </section>
-          </aside>
+            )}
+
+            {active === 'dashboard' && (
+              <div className="flex h-full flex-col">
+                <ModuleHeader title="Dashboard" subtitle="Slotting health and the size of the prize" />
+                <div className="flex-1 space-y-6 overflow-y-auto p-5">
+                  <IntelligenceSummary recommendations={recommendations} skus={skus} />
+                  <KpiPanel metrics={metrics} />
+                  <section>
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      What-if optimisation
+                    </h3>
+                    <SimulationControls
+                      baseline={baselineMetrics}
+                      projected={metrics}
+                      isSimulating={isSimulating}
+                      applying={applying}
+                      onSimulate={simulate}
+                      onApply={() => void apply()}
+                      onRevert={revert}
+                    />
+                  </section>
+                </div>
+              </div>
+            )}
+
+            {active === 'moves' && (
+              <div className="flex h-full flex-col">
+                <ModuleHeader title="Moves" subtitle="AI move recommendations ranked by payback" />
+                <div className="flex-1 space-y-5 overflow-y-auto p-5">
+                  <IntelligenceSummary recommendations={recommendations} skus={skus} />
+                  <RecommendationsPanel
+                    recommendations={recommendations}
+                    skus={skus}
+                    slots={displaySlots}
+                    selectedSlotId={selectedSlotId}
+                    onSelectSlot={setSelectedSlotId}
+                  />
+                </div>
+              </div>
+            )}
+
+            {active === 'items' && (
+              <div className="flex h-full flex-col">
+                <ModuleHeader title="Items" subtitle={`${skus.length} SKUs · master data`} />
+                <div className="border-b border-gray-200 bg-white px-5 py-3">
+                  <ImportControls
+                    importing={importing}
+                    error={importError}
+                    onImport={(file) => void importCsv(file)}
+                  />
+                </div>
+                <div className="min-h-0 flex-1">
+                  <ItemsTable skus={skus} />
+                </div>
+              </div>
+            )}
+
+            {active === 'slots' && (
+              <div className="flex h-full flex-col">
+                <ModuleHeader title="Slots" subtitle={`${displaySlots.length} locations`} />
+                <div className="min-h-0 flex-1">
+                  <SlotsTable
+                    slots={displaySlots}
+                    skus={skus}
+                    selectedSlotId={selectedSlotId}
+                    onSelectSlot={setSelectedSlotId}
+                  />
+                </div>
+              </div>
+            )}
+
+            {active === 'reports' && (
+              <div className="flex h-full flex-col">
+                <ModuleHeader title="Reports" subtitle="Worst-slotted SKUs — biggest travel wins" />
+                <div className="min-h-0 flex-1 overflow-y-auto p-5">
+                  <WorstSlottedList
+                    entries={metrics.worst}
+                    selectedSlotId={selectedSlotId}
+                    onSelectSlot={setSelectedSlotId}
+                  />
+                </div>
+              </div>
+            )}
+
+            {active === 'scenarios' && <ComingSoon title="Scenarios" />}
+          </main>
         </div>
       )}
     </div>
