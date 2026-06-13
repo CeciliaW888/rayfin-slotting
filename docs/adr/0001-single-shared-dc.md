@@ -1,0 +1,3 @@
+# Single shared Distribution Centre, not per-user
+
+The Slotting Twin models one shared DC visible to every authenticated user, and we dropped the per-user row ownership policy that the Todo template uses (`policy: claims.sub.eq(item.user_id)`). A DC is a single shared facility, so seeding is global (done once, present for everyone on first login) and Slots/SKUs carry no owner. Trade-off accepted: re-slotting in later phases is shared state, so concurrent demos affect each other — acceptable for a demo tool, and arguably realistic. The rejected alternative (per-user sandbox DCs) would isolate experiments but require seeding a fresh DC on every signup and lose a single source of truth.
