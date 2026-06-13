@@ -2,7 +2,7 @@
 
 ## Decision
 
-Use the **Aragon backend** as the target backend for the next production-ready iteration. The current Rayfin/local demo remains useful for visual prototyping, but the OptiSlot-style workstation should be designed around a backend that can support persistent scenarios, orders, rules, move workflows, reports, and richer warehouse master data.
+Use the **Rayfin backend** as the target backend for the next production-ready iteration. The current demo mode remains useful for visual prototyping, but the OptiSlot-style workstation should be designed around Rayfin entities and services that can support persistent scenarios, orders, rules, move workflows, reports, and richer warehouse master data.
 
 ## Evidence from OptiSlot video and screenshots
 
@@ -46,9 +46,9 @@ Build a **DC digital twin + slotting workstation** with these layers:
 4. **Workflow layer** — scenario creation, compare, approve/reject moves, export implementation list.
 5. **Reporting layer** — comparison reports, cost impact, capacity recovery, rule violations, storage analysis.
 
-## Backend direction: Aragon
+## Backend direction: Rayfin
 
-Use Aragon for the next backend iteration. Required backend capabilities:
+Use Rayfin for the next backend iteration. Required backend capabilities:
 
 - Persist item master data.
 - Persist warehouse slots and location hierarchy.
@@ -61,7 +61,7 @@ Use Aragon for the next backend iteration. Required backend capabilities:
 - Support sample/demo data seeding.
 - Support API endpoints for the React UI.
 
-Suggested Aragon-backed entities/resources:
+Suggested Rayfin-backed entities/resources:
 
 - `Item`
 - `Slot`
@@ -451,12 +451,12 @@ Reasons:
 - Route/path visualisation.
 - Before/after route comparison.
 
-### Sprint 5 — Aragon backend productionisation
+### Sprint 5 — Rayfin backend productionisation
 
-- Move seeded/demo data into Aragon-backed persistence.
+- Move seeded/demo data into Rayfin-backed persistence.
 - Add API endpoints for all core resources.
 - Add migrations/seed scripts.
-- Wire React services to Aragon.
+- Wire React services to Rayfin.
 - Keep demo mode as a fallback only.
 
 ## MVP acceptance criteria
@@ -471,4 +471,4 @@ The next demo should satisfy these checks:
 - User can review move recommendations with reason codes and payback.
 - User can compare Current Slotting vs Scenario 1 in a Comp. Reports table.
 - User can see an order trace path through the DC.
-- Backend direction is Aragon for persistent scenarios, orders, moves, rules, and reports.
+- Backend direction is Rayfin for persistent scenarios, orders, moves, rules, and reports.
