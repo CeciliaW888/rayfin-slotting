@@ -4,6 +4,14 @@ export interface SkuRow {
   name: string;
   category: string;
   picksPerDay: number;
+  /** Physical cube/volume used to model replenishment and slot fit. */
+  cube?: number;
+  /** Unit/case weight used for golden-zone and rack-safety constraints. */
+  weight?: number;
+  /** Forecast/promo uplift multiplier; 1 means no uplift. */
+  forecastMultiplier?: number;
+  /** Products in the same affinity group are commonly ordered together. */
+  affinityGroup?: string | null;
 }
 
 export interface SlotRow {
@@ -15,6 +23,8 @@ export interface SlotRow {
   y: number;
   zone?: string | null;
   sku_id?: string | null;
+  storageType?: string | null;
+  capacityCube?: number | null;
 }
 
 export type SkuSpec = Omit<SkuRow, 'id'>;

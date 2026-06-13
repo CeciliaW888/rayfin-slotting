@@ -22,6 +22,18 @@ describe('parseSkuCsv', () => {
     expect(skus[0].picksPerDay).toBe(42);
   });
 
+  it('parses optional AI slotting signals when present', () => {
+    const text = 'code,name,category,picksPerDay,cube,weight,forecastMultiplier,affinityGroup\nA1,Widget,Ambient,42,3.5,9,1.8,order-kit';
+    const { skus, errors } = parseSkuCsv(text);
+    expect(errors).toHaveLength(0);
+    expect(skus[0]).toMatchObject({
+      cube: 3.5,
+      weight: 9,
+      forecastMultiplier: 1.8,
+      affinityGroup: 'order-kit',
+    });
+  });
+
   it('skips rows with an invalid pick rate but keeps valid ones', () => {
     const text = 'code,name,category,picksPerDay\nA1,Widget,Tools,abc\nB2,Gadget,Tools,7';
     const { skus, errors } = parseSkuCsv(text);

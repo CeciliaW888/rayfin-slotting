@@ -1,6 +1,10 @@
-# Slotting Twin
+# Rayfin Slotting AI Twin
 
 A 3D digital twin of a distribution centre (DC) for diagnosing and improving product placement (slotting). Built on [Rayfin](https://github.com/microsoft/rayfin) with a React + React Three Fiber frontend.
+
+> **Next architecture direction:** the OptiSlot-style workstation plan targets an **Aragon backend** for persistent items, slots, orders, rules, scenarios, moves, and reports. See [`docs/optislot-digital-twin-plan.md`](docs/optislot-digital-twin-plan.md).
+
+The product direction is inspired by OptiSlot-style DC visualisation and scenario comparison, plus AI-powered dynamic slotting: small, explainable, high-ROI moves ranked by payback rather than one-off manual re-slotting projects.
 
 > **Experimental Rayfin features.** This app uses username/password authentication and Docker local hosting (`rayfin dev`). Both are experimental and APIs may change.
 
@@ -8,9 +12,11 @@ A 3D digital twin of a distribution centre (DC) for diagnosing and improving pro
 
 - **3D DC view** — explore aisles, bays, and levels in an interactive warehouse scene
 - **Slotting KPIs** — travel cost, health score, golden-zone compliance, and worst-slotted SKUs
-- **Colour modes** — ABC class, pick density, and golden-zone views
+- **AI move recommendations** — ranks opportunistic swaps by annual savings, move cost, payback days, confidence, and reason codes
+- **Differentiated optimisation signals** — combines velocity, forecast uplift, basket affinity, cube/replenishment pressure, golden-zone ergonomics, and SKU-slot compatibility
+- **Colour modes** — ABC class, pick density, forecast heatmap, and fit-risk views
 - **What-if simulation** — preview an optimised layout before applying it
-- **CSV import** — rebuild the DC from your own SKU data (`samples/skus.example.csv`)
+- **CSV import** — rebuild the DC from your own SKU data (`samples/skus.example.csv`), including optional AI fields: `cube`, `weight`, `forecastMultiplier`, and `affinityGroup`
 
 Metrics and optimisation run **client-side** for transparency and fast iteration on demo-sized datasets. See [docs/adr/](docs/adr/) for design decisions.
 
@@ -57,13 +63,13 @@ Local Docker requires `RAYFIN_FEATURE_FLAGS=docker-local-dev` and `RAYFIN_WEBSER
 ├── rayfin/
 │   ├── rayfin.yml          # Rayfin service config (auth, data, static hosting)
 │   └── data/
-│       ├── Slot.ts         # Storage position entity
-│       ├── Sku.ts          # Product entity (pick rate)
+│       ├── Slot.ts         # Storage position entity (zone, storage type, capacity)
+│       ├── Sku.ts          # Product entity (pick rate + AI slotting signals)
 │       └── schema.ts       # Typed client schema export
 ├── src/
 │   ├── pages/HomePage.tsx  # Main twin UI (3D view + side panel)
 │   ├── scene/              # React Three Fiber warehouse renderer
-│   ├── slotting/           # Metrics, optimisation, CSV import, seed data
+│   ├── slotting/           # Metrics, AI recommendations, optimisation, CSV import, seed data
 │   ├── hooks/useSlotting.ts
 │   ├── components/         # KPIs, simulation, import, view controls
 │   └── services/           # Rayfin client + auth bootstrap

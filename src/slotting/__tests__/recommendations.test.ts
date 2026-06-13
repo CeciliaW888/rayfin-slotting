@@ -1,0 +1,83 @@
+import { describe, expect, it } from 'vitest';
+
+import { recommendMoves } from '@/slotting/recommendations';
+import { DOCK, type SkuRow, type SlotRow } from '@/slotting/types';
+
+function sku(overrides: Partial<SkuRow> & Pick<SkuRow, 'id' | 'picksPerDay'>): SkuRow {
+  const { id, picksPerDay, ...rest } = overrides;
+  return {
+    id,
+    code: id,
+    name: id,
+    category: 'Ambient',
+    picksPerDay,
+    ...rest,
+  };
+}
+
+function slot(overrides: Partial<SlotRow> & Pick<SlotRow, 'id' | 'x' | 'y'>): SlotRow {
+  const { id, x, y, ...rest } = overrides;
+  return {
+    id,
+    aisle: 1,
+    bay: 1,
+    level: 2,
+    x,
+    y,
+    sku_id: null,
+    storageType: 'each-pick',
+    zone: 'ambient',
+    capacityCube: 100,
+    ...rest,
+  };
+}
+
+const near = { x: DOCK.x - 1, y: DOCK.y };
+const far = { x: 1, y: 0 };
+
+describe('recommendMoves', () => {
+  it('ranks high payback swaps and explains the ROI drivers', () => {
+    const fast = sku({ id: 'fast', picksPerDay: 120, cube: 2, affinityGroup: 'A' });
+    const slow = sku({ id: 'slow', picksPerDay: 5, cube: 1, affinityGroup: 'B' });
+    const slots = [
+      slot({ id: 'far', x: far.x, y: far.y, sku_id: fast.id }),
+      slot({ id: 'near', x: near.x, y: near.y, sku_id: slow.id }),
+    ];
+
+    const [rec] = recommendMoves(slots, [fast, slow], { maxRecommendations: 3 });
+
+    expect(rec.fromSlotId).toBe('far');
+    expect(rec.toSlotId).toBe('near');
+    expect(rec.skuId).toBe('fast');
+    expect(rec.annualSavings).toBeGreaterThan(rec.moveCost);
+    expect(rec.paybackDays).toBeLessThan(30);
+    expect(rec.reasonCodes).toContain('velocity');
+  });
+
+  it('respects compatibility and never recommends a chilled SKU into an ambient-only slot', () => {
+    const chilledFast = sku({ id: 'milk', category: 'Chilled', picksPerDay: 200, cube: 1 });
+    const ambientSlow = sku({ id: 'bolts', category: 'Ambient', picksPerDay: 1, cube: 1 });
+    const slots = [
+      slot({ id: 'chilled-far', x: far.x, y: far.y, sku_id: chilledFast.id, zone: 'chilled' }),
+      slot({ id: 'ambient-near', x: near.x, y: near.y, sku_id: ambientSlow.id, zone: 'ambient' }),
+    ];
+
+    const recs = recommendMoves(slots, [chilledFast, ambientSlow]);
+
+    expect(recs.find((r) => r.skuId === 'milk' && r.toSlotId === 'ambient-near')).toBeUndefined();
+  });
+
+  it('uses forecast uplift so a promo item can outrank a historically faster SKU', () => {
+    const promo = sku({ id: 'promo', category: 'Ambient', picksPerDay: 20, forecastMultiplier: 8 });
+    const steady = sku({ id: 'steady', category: 'Ambient', picksPerDay: 100, forecastMultiplier: 1 });
+    const slots = [
+      slot({ id: 'far', x: far.x, y: far.y, sku_id: promo.id }),
+      slot({ id: 'near', x: near.x, y: near.y, sku_id: steady.id }),
+    ];
+
+    const [rec] = recommendMoves(slots, [promo, steady]);
+
+    expect(rec.skuId).toBe('promo');
+    expect(rec.reasonCodes).toContain('forecast');
+  });
+});

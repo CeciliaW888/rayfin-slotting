@@ -1,7 +1,8 @@
 import { classifyAbc } from './metrics';
+import { forecastedPicks, isCompatible } from './recommendations';
 import type { AbcClass, SkuRow, SlotRow } from './types';
 
-export type ViewMode = 'abc' | 'heat';
+export type ViewMode = 'abc' | 'heat' | 'forecast' | 'compatibility';
 
 export const ABC_COLOR: Record<AbcClass, string> = {
   A: '#c4825a',
@@ -41,10 +42,19 @@ export function slotColors(
     return out;
   }
 
-  const maxPicks = skus.reduce((m, s) => Math.max(m, s.picksPerDay), 1);
+  if (mode === 'compatibility') {
+    for (const slot of slots) {
+      const sku = slot.sku_id ? skuById.get(slot.sku_id) : undefined;
+      out.set(slot.id, !sku || isCompatible(sku, slot) ? '#9fbf88' : '#c4522e');
+    }
+    return out;
+  }
+
+  const value = (sku: SkuRow) => (mode === 'forecast' ? forecastedPicks(sku) : sku.picksPerDay);
+  const maxPicks = skus.reduce((m, s) => Math.max(m, value(s)), 1);
   for (const slot of slots) {
     const sku = slot.sku_id ? skuById.get(slot.sku_id) : undefined;
-    out.set(slot.id, sku ? heatColor(sku.picksPerDay / maxPicks) : EMPTY_COLOR);
+    out.set(slot.id, sku ? heatColor(value(sku) / maxPicks) : EMPTY_COLOR);
   }
   return out;
 }

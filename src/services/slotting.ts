@@ -12,6 +12,33 @@ import type { SkuRow, SlotRow } from '@/slotting/types';
 
 import { getRayfinClient } from './rayfinClient';
 
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
+
+let demoState: { skus: SkuRow[]; slots: SlotRow[] } | null = null;
+
+function slotId(slot: SlotSpec): string {
+  return `A${slot.aisle}-B${slot.bay}-L${slot.level}`;
+}
+
+function buildDemoState(skuSpecs: SkuSpec[], slots: SlotSpec[], assignments: (string | null)[]) {
+  const codeToId = new Map(skuSpecs.map((sku) => [sku.code, sku.code]));
+  demoState = {
+    skus: skuSpecs.map((sku) => ({ id: sku.code, ...sku })),
+    slots: slots.map((slot, index) => ({
+      id: slotId(slot),
+      ...slot,
+      sku_id: assignments[index] ? codeToId.get(assignments[index]!) ?? null : null,
+    })),
+  };
+  return demoState;
+}
+
+function ensureDemoState(): { skus: SkuRow[]; slots: SlotRow[] } {
+  if (demoState) return demoState;
+  const { skus, slots, assignments } = generateDc();
+  return buildDemoState(skus, slots, assignments);
+}
+
 /** Re-throw after triggering session expiry if it's an auth error. */
 function handleError(err: unknown): never {
   const isAuthError =
@@ -26,6 +53,7 @@ function handleError(err: unknown): never {
 }
 
 export async function getSkus(): Promise<SkuRow[]> {
+  if (DEMO_MODE) return ensureDemoState().skus;
   try {
     const client = getRayfinClient();
     const rows = await client.data.Sku.select([
@@ -34,6 +62,10 @@ export async function getSkus(): Promise<SkuRow[]> {
       'name',
       'category',
       'picksPerDay',
+      'cube',
+      'weight',
+      'forecastMultiplier',
+      'affinityGroup',
     ]).execute();
     return rows as SkuRow[];
   } catch (err) {
@@ -42,6 +74,7 @@ export async function getSkus(): Promise<SkuRow[]> {
 }
 
 export async function getSlots(): Promise<SlotRow[]> {
+  if (DEMO_MODE) return ensureDemoState().slots;
   try {
     const client = getRayfinClient();
     const rows = await client.data.Slot.select([
@@ -51,6 +84,9 @@ export async function getSlots(): Promise<SlotRow[]> {
       'level',
       'x',
       'y',
+      'zone',
+      'storageType',
+      'capacityCube',
       'sku_id',
     ]).execute();
     return rows as SlotRow[];
@@ -60,6 +96,11 @@ export async function getSlots(): Promise<SlotRow[]> {
 }
 
 export async function reslot(slotId: string, skuId: string | null): Promise<void> {
+  if (DEMO_MODE) {
+    const slot = ensureDemoState().slots.find((s) => s.id === slotId);
+    if (slot) slot.sku_id = skuId;
+    return;
+  }
   try {
     const client = getRayfinClient();
     await client.data.Slot.update({ id: slotId }, { sku_id: skuId ?? undefined });
@@ -82,6 +123,10 @@ async function createDc(
       name: sku.name,
       category: sku.category,
       picksPerDay: sku.picksPerDay,
+      cube: sku.cube,
+      weight: sku.weight,
+      forecastMultiplier: sku.forecastMultiplier,
+      affinityGroup: sku.affinityGroup ?? undefined,
     });
     codeToId.set(sku.code, (created as { id: string }).id);
   }
@@ -94,6 +139,9 @@ async function createDc(
       level: slot.level,
       x: slot.x,
       y: slot.y,
+      zone: slot.zone ?? undefined,
+      storageType: slot.storageType ?? undefined,
+      capacityCube: slot.capacityCube ?? undefined,
       sku_id: code ? codeToId.get(code) : undefined,
     });
   }
@@ -113,6 +161,10 @@ async function clearAll(): Promise<void> {
  * select minimal fields and check length (per Rayfin known limitations).
  */
 export async function seedIfEmpty(): Promise<void> {
+  if (DEMO_MODE) {
+    ensureDemoState();
+    return;
+  }
   try {
     const client = getRayfinClient();
     const existing = await client.data.Sku.select(['id']).execute();
@@ -126,6 +178,12 @@ export async function seedIfEmpty(): Promise<void> {
 
 /** Replace the whole DC with imported SKUs, placed into the standard slot grid. */
 export async function importSkus(skuSpecs: SkuSpec[]): Promise<void> {
+  if (DEMO_MODE) {
+    const slots = generateSlotGrid();
+    const assignments = worstCaseAssignment(slots, skuSpecs);
+    buildDemoState(skuSpecs, slots, assignments);
+    return;
+  }
   try {
     await clearAll();
     const slots = generateSlotGrid();

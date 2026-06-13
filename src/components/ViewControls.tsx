@@ -3,6 +3,8 @@ import { ABC_COLOR, heatColor, type ViewMode } from '@/slotting/colors';
 const MODES: { id: ViewMode; label: string }[] = [
   { id: 'abc', label: 'ABC class' },
   { id: 'heat', label: 'Pick heatmap' },
+  { id: 'forecast', label: 'Forecast heatmap' },
+  { id: 'compatibility', label: 'Fit risk' },
 ];
 
 export function ViewControls({
@@ -31,7 +33,7 @@ export function ViewControls({
       </div>
 
       <div className="mt-3">
-        {mode === 'abc' ? <AbcLegend /> : <HeatLegend />}
+        {mode === 'abc' ? <AbcLegend /> : mode === 'compatibility' ? <CompatibilityLegend /> : <HeatLegend forecast={mode === 'forecast'} />}
       </div>
     </div>
   );
@@ -58,15 +60,28 @@ function AbcLegend() {
   );
 }
 
-function HeatLegend() {
+function HeatLegend({ forecast = false }: { forecast?: boolean }) {
   const gradient = `linear-gradient(to right, ${heatColor(0)}, ${heatColor(0.5)}, ${heatColor(1)})`;
   return (
     <div className="text-xs text-gray-500">
       <div className="h-3 w-full rounded-sm" style={{ background: gradient }} />
       <div className="mt-1 flex justify-between">
-        <span>few picks</span>
-        <span>many picks</span>
+        <span>{forecast ? 'low forecast' : 'few picks'}</span>
+        <span>{forecast ? 'high forecast' : 'many picks'}</span>
       </div>
+    </div>
+  );
+}
+
+function CompatibilityLegend() {
+  return (
+    <div className="flex gap-3 text-xs text-gray-500">
+      <span className="inline-flex items-center gap-1.5">
+        <span className="inline-block h-3 w-3 rounded-sm bg-[#9fbf88]" /> fits rules
+      </span>
+      <span className="inline-flex items-center gap-1.5">
+        <span className="inline-block h-3 w-3 rounded-sm bg-[#c4522e]" /> needs review
+      </span>
     </div>
   );
 }

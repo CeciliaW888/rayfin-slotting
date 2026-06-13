@@ -1,4 +1,4 @@
-import { entity, authenticated, uuid, int, decimal, one } from '@microsoft/rayfin-core';
+import { entity, authenticated, uuid, int, decimal, one, text } from '@microsoft/rayfin-core';
 
 import { Sku } from './Sku.js';
 
@@ -13,6 +13,9 @@ export class Slot {
   @int({ min: 1, max: 3 }) level!: number;
   @decimal() x!: number;
   @decimal() y!: number;
+  @text({ max: 32, optional: true }) zone?: string;
+  @text({ max: 32, optional: true }) storageType?: string;
+  @decimal({ optional: true }) capacityCube?: number;
   @uuid({ optional: true }) sku_id?: string;
   @one(() => Sku, { optional: true }) sku?: Sku;
 }

@@ -10,6 +10,7 @@ import {
 import { parseSkuCsv } from '@/slotting/csv';
 import { computeMetrics, type Metrics } from '@/slotting/metrics';
 import { optimizeSlots } from '@/slotting/optimize';
+import { recommendMoves, type MoveRecommendation } from '@/slotting/recommendations';
 import { SLOT_COUNT } from '@/slotting/seed';
 import type { SkuRow, SlotRow } from '@/slotting/types';
 
@@ -22,6 +23,7 @@ export interface Slotting {
   metrics: Metrics | null;
   /** Metrics for the real persisted layout — the "before" baseline. */
   baselineMetrics: Metrics | null;
+  recommendations: MoveRecommendation[];
   isSimulating: boolean;
   applying: boolean;
   importing: boolean;
@@ -74,6 +76,10 @@ export function useSlotting(): Slotting {
   const metrics = useMemo(
     () => (displaySlots.length ? computeMetrics(displaySlots, skus) : null),
     [displaySlots, skus]
+  );
+  const recommendations = useMemo(
+    () => (actualSlots.length ? recommendMoves(actualSlots, skus, { maxRecommendations: 12 }) : []),
+    [actualSlots, skus]
   );
 
   const simulate = useCallback(
@@ -130,6 +136,7 @@ export function useSlotting(): Slotting {
     displaySlots,
     metrics,
     baselineMetrics,
+    recommendations,
     isSimulating: simulatedSlots !== null,
     applying,
     importing,

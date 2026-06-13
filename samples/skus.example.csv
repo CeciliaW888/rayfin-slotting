@@ -1,31 +1,31 @@
-code,name,category,picksPerDay
-BEV-001,Cola 330ml Can,Beverages,420
-BEV-002,Sparkling Water 1L,Beverages,310
-SNK-001,Salted Crisps 150g,Snacks,265
-DRY-001,Whole Milk 2L,Dairy,240
-BEV-003,Orange Juice 1L,Beverages,210
-SNK-002,Chocolate Bar 100g,Snacks,185
-HOM-001,Kitchen Roll 4pk,Household,160
-DRY-002,Greek Yoghurt 500g,Dairy,140
-PER-001,Toothpaste 100ml,Personal Care,120
-FRZ-001,Frozen Pizza 400g,Frozen,110
-BEV-004,Energy Drink 250ml,Beverages,98
-SNK-003,Mixed Nuts 200g,Snacks,84
-HOM-002,Dish Soap 500ml,Household,77
-DRY-003,Cheddar Block 400g,Dairy,69
-PER-002,Shampoo 400ml,Personal Care,61
-FRZ-002,Ice Cream Tub 1L,Frozen,55
-BEV-005,Iced Tea 500ml,Beverages,48
-SNK-004,Granola Bars 6pk,Snacks,42
-HOM-003,Laundry Pods 20pk,Household,37
-DRY-004,Butter 250g,Dairy,33
-PER-003,Hand Soap 250ml,Personal Care,29
-FRZ-003,Frozen Peas 900g,Frozen,25
-BEV-006,Coconut Water 330ml,Beverages,22
-SNK-005,Rice Cakes 130g,Snacks,19
-HOM-004,Bin Bags 30pk,Household,16
-DRY-005,Cream Cheese 200g,Dairy,13
-PER-004,Deodorant 150ml,Personal Care,11
-FRZ-004,Fish Fillets 500g,Frozen,9
-HOM-005,Foil Wrap 30m,Household,6
-PER-005,Razor Blades 4pk,Personal Care,4
+code,name,category,picksPerDay,cube,weight,forecastMultiplier,affinityGroup
+BEV-001,Cola 330ml Can,Ambient,420,2.2,3,1.1,beverage-kit
+BEV-002,Sparkling Water 1L,Ambient,310,4.5,8,1.0,beverage-kit
+SNK-001,Salted Crisps 150g,Ambient,265,5.5,2,1.3,snack-kit
+DRY-001,Whole Milk 2L,Chilled,240,6.0,12,1.0,dairy-kit
+BEV-003,Orange Juice 1L,Chilled,210,4.8,7,1.6,beverage-kit
+SNK-002,Chocolate Bar 100g,Ambient,185,1.2,1,2.1,snack-kit
+HOM-001,Kitchen Roll 4pk,Bulky,160,28,4,1.0,household-kit
+DRY-002,Greek Yoghurt 500g,Chilled,140,3.5,5,1.0,dairy-kit
+PER-001,Toothpaste 100ml,Ambient,120,1.4,1,1.0,personal-care
+FRZ-001,Frozen Pizza 400g,Chilled,110,6.5,2,1.0,frozen-meal
+BEV-004,Energy Drink 250ml,Ambient,98,1.8,3,2.4,beverage-kit
+SNK-003,Mixed Nuts 200g,Ambient,84,2.1,2,1.0,snack-kit
+HOM-002,Dish Soap 500ml,Hazmat,77,3.0,5,1.0,household-kit
+DRY-003,Cheddar Block 400g,Chilled,69,2.8,4,1.0,dairy-kit
+PER-002,Shampoo 400ml,Hazmat,61,2.6,4,1.2,personal-care
+FRZ-002,Ice Cream Tub 1L,Chilled,55,5.2,2,1.0,frozen-meal
+BEV-005,Iced Tea 500ml,Ambient,48,2.5,3,1.0,beverage-kit
+SNK-004,Granola Bars 6pk,Ambient,42,2.0,2,1.9,snack-kit
+HOM-003,Laundry Pods 20pk,Hazmat,37,5.5,6,1.0,household-kit
+DRY-004,Butter 250g,Chilled,33,1.8,3,1.0,dairy-kit
+PER-003,Hand Soap 250ml,Hazmat,29,1.9,2,1.0,personal-care
+FRZ-003,Frozen Peas 900g,Chilled,25,4.4,2,1.0,frozen-meal
+BEV-006,Coconut Water 330ml,Ambient,22,1.9,3,1.7,beverage-kit
+SNK-005,Rice Cakes 130g,Ambient,19,4.8,1,1.0,snack-kit
+HOM-004,Bin Bags 30pk,Bulky,16,18,3,1.0,household-kit
+DRY-005,Cream Cheese 200g,Chilled,13,1.6,1,1.0,dairy-kit
+PER-004,Deodorant 150ml,Hazmat,11,1.3,1,1.0,personal-care
+FRZ-004,Fish Fillets 500g,Chilled,9,3.2,1,1.0,frozen-meal
+HOM-005,Foil Wrap 30m,Ambient,6,2.7,1,1.0,household-kit
+PER-005,Razor Blades 4pk,Ambient,4,0.8,1,1.0,personal-care

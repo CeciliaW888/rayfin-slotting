@@ -38,4 +38,18 @@ describe('optimizeSlots', () => {
     );
     expect(next.filter((s) => s.sku_id === null)).toHaveLength(1);
   });
+
+  it('respects zone compatibility when assigning fastest movers', () => {
+    const chilled = { ...sku('milk', 200), category: 'Chilled' };
+    const ambient = { ...sku('bolts', 10), category: 'Ambient' };
+    const next = optimizeSlots(
+      [
+        { ...slot('ambient-near', NEAR_DOCK.x, NEAR_DOCK.y), zone: 'ambient' },
+        { ...slot('chilled-far', FAR_FROM_DOCK.x, FAR_FROM_DOCK.y), zone: 'chilled' },
+      ],
+      [chilled, ambient]
+    );
+    expect(next.find((s) => s.id === 'chilled-far')?.sku_id).toBe('milk');
+    expect(next.find((s) => s.id === 'ambient-near')?.sku_id).toBe('bolts');
+  });
 });
