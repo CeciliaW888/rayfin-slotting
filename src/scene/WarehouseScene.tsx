@@ -2,15 +2,9 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 import { OrbitControls as ThreeOrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-import { classifyAbc } from '@/slotting/metrics';
-import type { AbcClass, SkuRow, SlotRow } from '@/slotting/types';
+import { EMPTY_COLOR } from '@/slotting/colors';
+import type { SlotRow } from '@/slotting/types';
 
-const ABC_COLOR: Record<AbcClass, string> = {
-  A: '#c4825a',
-  B: '#cdb79a',
-  C: '#aec3c9',
-};
-const EMPTY_COLOR = '#e7ded2';
 const SELECTED_COLOR = '#ffffff';
 
 // Vanilla three OrbitControls wrapped in a small R3F component — avoids pulling
@@ -36,18 +30,15 @@ function CameraControls({ tx, ty, tz }: { tx: number; ty: number; tz: number }) 
 
 export function WarehouseScene({
   slots,
-  skus,
+  colorById,
   selectedSlotId,
   onSelectSlot,
 }: {
   slots: SlotRow[];
-  skus: SkuRow[];
+  colorById: Map<string, string>;
   selectedSlotId: string | null;
   onSelectSlot: (slotId: string) => void;
 }) {
-  const abc = classifyAbc(skus);
-  const skuById = new Map(skus.map((s) => [s.id, s]));
-
   return (
     <Canvas camera={{ position: [20, 18, 24], fov: 50 }}>
       <color attach="background" args={['#eef2f4']} />
@@ -62,14 +53,10 @@ export function WarehouseScene({
       </mesh>
 
       {slots.map((slot) => {
-        const sku = slot.sku_id ? skuById.get(slot.sku_id) : undefined;
-        const cls = sku ? abc.get(sku.id) : undefined;
         const color =
           selectedSlotId === slot.id
             ? SELECTED_COLOR
-            : cls
-              ? ABC_COLOR[cls]
-              : EMPTY_COLOR;
+            : (colorById.get(slot.id) ?? EMPTY_COLOR);
         return (
           <mesh
             key={slot.id}

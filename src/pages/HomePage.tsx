@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { KpiPanel } from '@/components/KpiPanel';
+import { ViewControls } from '@/components/ViewControls';
 import { WorstSlottedList } from '@/components/WorstSlottedList';
 import { useAuth } from '@/hooks/AuthContext';
 import { WarehouseScene } from '@/scene/WarehouseScene';
+import { slotColors, type ViewMode } from '@/slotting/colors';
 import { computeMetrics, type Metrics } from '@/slotting/metrics';
 import type { SkuRow, SlotRow } from '@/slotting/types';
 import { getSkus, getSlots, seedIfEmpty } from '@/services/slotting';
@@ -15,6 +17,7 @@ export function HomePage() {
   const [skus, setSkus] = useState<SkuRow[]>([]);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('abc');
 
   useEffect(() => {
     let cancelled = false;
@@ -31,6 +34,11 @@ export function HomePage() {
       cancelled = true;
     };
   }, []);
+
+  const colorById = useMemo(
+    () => slotColors(slots, skus, viewMode),
+    [slots, skus, viewMode]
+  );
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -57,12 +65,18 @@ export function HomePage() {
           <div className="flex-1 min-w-0">
             <WarehouseScene
               slots={slots}
-              skus={skus}
+              colorById={colorById}
               selectedSlotId={selectedSlotId}
               onSelectSlot={setSelectedSlotId}
             />
           </div>
           <aside className="w-96 shrink-0 border-l border-gray-200 bg-gray-50 overflow-y-auto p-5 space-y-6">
+            <section>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
+                View
+              </h2>
+              <ViewControls mode={viewMode} onChange={setViewMode} />
+            </section>
             <section>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
                 Slotting KPIs
