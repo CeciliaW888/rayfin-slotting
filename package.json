@@ -1,13 +1,9 @@
 {
-  "name": "starter",
-  "private": true,
-  "version": "0.0.0",
+  "name": "rayfin-slotting",
+  "private": false,
+  "version": "0.1.0",
+  "description": "3D distribution centre slotting twin on Rayfin",
   "type": "module",
-  "template": {
-    "name": "todoapp",
-    "displayName": "[Experimental] Todo app with full local dev",
-    "description": "End-to-end todo CRUD with username/password auth, a Rayfin data model, and Docker local development — a working starter that exercises the full data path without Fabric"
-  },
   "scripts": {
     "predev": "rayfin env --framework vite",
     "prebuild": "rayfin env --framework vite",

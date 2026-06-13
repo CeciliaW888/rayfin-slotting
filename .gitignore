@@ -32,6 +32,8 @@ rayfin/.temp/
 # Agent / tooling scratch
 .superpowers/
 .playwright-mcp/
+.claude/
+.cursor/
 twin-*.png
 
 # Editor / OS

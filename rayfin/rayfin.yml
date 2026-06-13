@@ -1,5 +1,5 @@
-id: starter
-name: starter
+id: rayfin-slotting
+name: rayfin-slotting
 version: 1.0.0
 services:
   auth:
@@ -10,7 +10,6 @@ services:
       enabled: true
     allowedRedirectUris:
       - http://localhost:5173
-      - https://elite-shrub-7fb6a71a5d-westcentralus.webapp.msit.fabricapps.net
   data:
     enabled: true
     dialect: mssql

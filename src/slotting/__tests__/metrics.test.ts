@@ -8,7 +8,7 @@ import {
   healthScore,
   totalTravel,
 } from '@/slotting/metrics';
-import type { SkuRow, SlotRow } from '@/slotting/types';
+import { DOCK, type SkuRow, type SlotRow } from '@/slotting/types';
 
 function sku(id: string, picksPerDay: number): SkuRow {
   return { id, code: id, name: id, category: 'x', picksPerDay };
@@ -23,10 +23,15 @@ function slot(
   return { id, aisle: 1, bay: 1, level, x, y, sku_id };
 }
 
+/** Slot coordinates close to the dock (front-centre of the DC). */
+const NEAR_DOCK = { x: DOCK.x - 1, y: DOCK.y };
+/** Slot coordinates far from the dock. */
+const FAR_FROM_DOCK = { x: 1, y: 0 };
+
 describe('distanceToDock', () => {
-  it('is Manhattan distance from the origin', () => {
-    expect(distanceToDock({ x: 3, y: 4 })).toBe(7);
-    expect(distanceToDock({ x: 0, y: 0 })).toBe(0);
+  it('is Manhattan distance to the dock', () => {
+    expect(distanceToDock({ x: 10, y: 3 })).toBe(5); // |10-12| + |3-0|
+    expect(distanceToDock(DOCK)).toBe(0);
   });
 });
 
@@ -46,7 +51,7 @@ describe('totalTravel', () => {
   it('sums picks × distance for occupied slots only', () => {
     const skus = [sku('s1', 10)];
     const skuById = new Map(skus.map((s) => [s.id, s]));
-    const slots = [slot('a', 2, 3, 2, 's1'), slot('b', 5, 5, 2, null)];
+    const slots = [slot('a', 10, 3, 2, 's1'), slot('b', 5, 5, 2, null)];
     expect(totalTravel(slots, skuById)).toBe(50); // 10 × (2+3)
   });
 });
@@ -54,14 +59,17 @@ describe('totalTravel', () => {
 describe('bestAchievableTravel', () => {
   it('assigns fastest movers to the closest slots', () => {
     const skus = [sku('fast', 10), sku('slow', 1)];
-    const slots = [slot('near', 1, 0), slot('far', 9, 0)];
-    expect(bestAchievableTravel(slots, skus)).toBe(19); // 10×1 + 1×9
+    const slots = [slot('near', NEAR_DOCK.x, NEAR_DOCK.y), slot('far', FAR_FROM_DOCK.x, FAR_FROM_DOCK.y)];
+    expect(bestAchievableTravel(slots, skus)).toBe(21); // 10×1 + 1×11
   });
 
   it('is never worse than the current layout', () => {
     const skus = [sku('fast', 10), sku('slow', 1)];
     const skuById = new Map(skus.map((s) => [s.id, s]));
-    const bad = [slot('near', 1, 0, 2, 'slow'), slot('far', 9, 0, 2, 'fast')];
+    const bad = [
+      slot('near', NEAR_DOCK.x, NEAR_DOCK.y, 2, 'slow'),
+      slot('far', FAR_FROM_DOCK.x, FAR_FROM_DOCK.y, 2, 'fast'),
+    ];
     expect(bestAchievableTravel(bad, skus)).toBeLessThanOrEqual(totalTravel(bad, skuById));
   });
 });
@@ -80,7 +88,10 @@ describe('healthScore', () => {
 describe('computeMetrics', () => {
   it('flags a fast mover in a far slot as the worst offender', () => {
     const skus = [sku('fast', 100), sku('slow', 1)];
-    const slots = [slot('near', 1, 0, 2, 'slow'), slot('far', 9, 0, 2, 'fast')];
+    const slots = [
+      slot('near', NEAR_DOCK.x, NEAR_DOCK.y, 2, 'slow'),
+      slot('far', FAR_FROM_DOCK.x, FAR_FROM_DOCK.y, 2, 'fast'),
+    ];
     const m = computeMetrics(slots, skus);
     expect(m.misslottedCount).toBeGreaterThan(0);
     expect(m.worst[0].sku.id).toBe('fast');
@@ -89,7 +100,10 @@ describe('computeMetrics', () => {
 
   it('reports an optimal layout as 100 with no mis-slots', () => {
     const skus = [sku('fast', 100), sku('slow', 1)];
-    const slots = [slot('near', 1, 0, 2, 'fast'), slot('far', 9, 0, 2, 'slow')];
+    const slots = [
+      slot('near', NEAR_DOCK.x, NEAR_DOCK.y, 2, 'fast'),
+      slot('far', FAR_FROM_DOCK.x, FAR_FROM_DOCK.y, 2, 'slow'),
+    ];
     const m = computeMetrics(slots, skus);
     expect(m.healthScore).toBe(100);
     expect(m.misslottedCount).toBe(0);

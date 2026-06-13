@@ -164,7 +164,7 @@ export function useAuth(): AuthContextValue {
 
 /**
  * Global session-expired handler. Set by AuthProvider so that non-React
- * code (like the todos service) can trigger a redirect to the login page.
+ * code (like the slotting service) can trigger a redirect to the login page.
  */
 let globalSessionExpiredHandler: (() => void) | null = null;
 
