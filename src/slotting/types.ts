@@ -13,13 +13,17 @@ export interface SlotRow {
   level: number;
   x: number;
   y: number;
+  zone?: string | null;
   sku_id?: string | null;
 }
 
+export type SkuSpec = Omit<SkuRow, 'id'>;
+export type SlotSpec = Omit<SlotRow, 'id' | 'sku_id'>;
+
 export type AbcClass = 'A' | 'B' | 'C';
 
-// The dock sits at the origin; travel is measured from each slot to here.
-export const DOCK = { x: 0, y: 0 };
+// The dock sits at the centre of the front edge; travel is measured to here.
+export const DOCK = { x: 12, y: 0 };
 
 // Level 2 is the reach-height "golden zone" where fast movers belong.
 export const GOLDEN_LEVEL = 2;
