@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 
+import { ImportControls } from '@/components/ImportControls';
 import { KpiPanel } from '@/components/KpiPanel';
 import { SimulationControls } from '@/components/SimulationControls';
 import { ViewControls } from '@/components/ViewControls';
@@ -19,9 +20,12 @@ export function HomePage() {
     baselineMetrics,
     isSimulating,
     applying,
+    importing,
+    importError,
     simulate,
     revert,
     apply,
+    importCsv,
   } = useSlotting();
 
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
@@ -82,6 +86,16 @@ export function HomePage() {
                 View
               </h2>
               <ViewControls mode={viewMode} onChange={setViewMode} />
+            </section>
+            <section>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
+                Data
+              </h2>
+              <ImportControls
+                importing={importing}
+                error={importError}
+                onImport={(file) => void importCsv(file)}
+              />
             </section>
             <section>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">

@@ -1,8 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { getSkus, getSlots, reslot, seedIfEmpty } from '@/services/slotting';
+import {
+  getSkus,
+  getSlots,
+  importSkus,
+  reslot,
+  seedIfEmpty,
+} from '@/services/slotting';
+import { parseSkuCsv } from '@/slotting/csv';
 import { computeMetrics, type Metrics } from '@/slotting/metrics';
 import { optimizeSlots } from '@/slotting/optimize';
+import { SLOT_COUNT } from '@/slotting/seed';
 import type { SkuRow, SlotRow } from '@/slotting/types';
 
 export interface Slotting {
@@ -16,9 +24,12 @@ export interface Slotting {
   baselineMetrics: Metrics | null;
   isSimulating: boolean;
   applying: boolean;
+  importing: boolean;
+  importError: string | null;
   simulate: () => void;
   revert: () => void;
   apply: () => Promise<void>;
+  importCsv: (file: File) => Promise<void>;
 }
 
 /**
@@ -32,6 +43,8 @@ export function useSlotting(): Slotting {
   const [actualSlots, setActualSlots] = useState<SlotRow[]>([]);
   const [simulatedSlots, setSimulatedSlots] = useState<SlotRow[] | null>(null);
   const [applying, setApplying] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     const [slotRows, skuRows] = await Promise.all([getSlots(), getSkus()]);
@@ -88,6 +101,29 @@ export function useSlotting(): Slotting {
     }
   }, [simulatedSlots, actualSlots, reload]);
 
+  const importCsv = useCallback(
+    async (file: File) => {
+      setImporting(true);
+      setImportError(null);
+      try {
+        const text = await file.text();
+        const { skus: parsed, errors } = parseSkuCsv(text);
+        if (parsed.length === 0) {
+          setImportError(errors[0] ?? 'No valid rows found in the file.');
+          return;
+        }
+        await importSkus(parsed.slice(0, SLOT_COUNT));
+        setSimulatedSlots(null);
+        await reload();
+      } catch (err) {
+        setImportError(err instanceof Error ? err.message : 'Import failed.');
+      } finally {
+        setImporting(false);
+      }
+    },
+    [reload]
+  );
+
   return {
     loading,
     skus,
@@ -96,8 +132,11 @@ export function useSlotting(): Slotting {
     baselineMetrics,
     isSimulating: simulatedSlots !== null,
     applying,
+    importing,
+    importError,
     simulate,
     revert,
     apply,
+    importCsv,
   };
 }
