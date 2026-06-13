@@ -11,9 +11,10 @@ function AuthGuard({
   children: React.ReactNode;
   requireAuth: boolean;
 }) {
-  if (import.meta.env.VITE_DEMO_MODE === 'true') return <>{children}</>;
-
   const { isAuthenticated, loading } = useAuth();
+
+  // Demo mode runs without a backend, so skip auth entirely.
+  if (import.meta.env.VITE_DEMO_MODE === 'true') return <>{children}</>;
 
   if (loading) {
     return (
