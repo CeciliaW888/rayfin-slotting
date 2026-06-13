@@ -148,7 +148,16 @@ export function recommendMoves(
     }
   }
 
-  return recommendations
+  // A↔B and B↔A describe the same physical swap, so keep one per unordered
+  // slot pair — the more explanatory framing (more reason codes).
+  const byPair = new Map<string, MoveRecommendation>();
+  for (const rec of recommendations) {
+    const key = [rec.fromSlotId, rec.toSlotId].sort().join('|');
+    const kept = byPair.get(key);
+    if (!kept || rec.reasonCodes.length > kept.reasonCodes.length) byPair.set(key, rec);
+  }
+
+  return [...byPair.values()]
     .sort((a, b) => a.paybackDays - b.paybackDays || b.annualSavings - a.annualSavings)
     .slice(0, opts.maxRecommendations);
 }

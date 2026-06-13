@@ -54,6 +54,19 @@ describe('recommendMoves', () => {
     expect(rec.reasonCodes).toContain('velocity');
   });
 
+  it('lists a reciprocal swap only once', () => {
+    const fast = sku({ id: 'fast', picksPerDay: 120 });
+    const slow = sku({ id: 'slow', picksPerDay: 5 });
+    const slots = [
+      slot({ id: 'far', x: far.x, y: far.y, sku_id: fast.id }),
+      slot({ id: 'near', x: near.x, y: near.y, sku_id: slow.id }),
+    ];
+
+    const recs = recommendMoves(slots, [fast, slow]);
+
+    expect(recs).toHaveLength(1);
+  });
+
   it('respects compatibility and never recommends a chilled SKU into an ambient-only slot', () => {
     const chilledFast = sku({ id: 'milk', category: 'Chilled', picksPerDay: 200, cube: 1 });
     const ambientSlow = sku({ id: 'bolts', category: 'Ambient', picksPerDay: 1, cube: 1 });
