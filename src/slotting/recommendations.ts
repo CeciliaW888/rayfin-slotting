@@ -1,4 +1,5 @@
 import { distanceToDock } from './metrics';
+import { DEFAULT_RULES, type RuleSet } from './rules';
 import { GOLDEN_LEVEL, type SkuRow, type SlotRow } from './types';
 
 export type RecommendationReason =
@@ -60,37 +61,55 @@ export function requiredZone(category: string): 'dangerous-goods' | 'bulk' | 'ge
   return 'general';
 }
 
-export function isCompatible(sku: SkuRow, slot: SlotRow): boolean {
+export function isCompatible(sku: SkuRow, slot: SlotRow, rules: RuleSet = DEFAULT_RULES): boolean {
   const need = requiredZone(sku.category);
   const zone = normalise(slot.zone);
 
-  // The dangerous-goods bay only holds DG stock, and DG stock only goes there.
-  if (need === 'dangerous-goods' && zone !== 'dangerous-goods') return false;
-  if (zone === 'dangerous-goods' && need !== 'dangerous-goods') return false;
-  // Bulky gear belongs in bulk storage.
-  if (need === 'bulk' && zone !== 'bulk') return false;
-
-  if (sku.cube && slot.capacityCube && sku.cube > slot.capacityCube) return false;
-  if (sku.weight && sku.weight > 20 && slot.level > GOLDEN_LEVEL) return false;
+  if (rules.zoneSegregation) {
+    // The dangerous-goods bay only holds DG stock, and DG stock only goes there.
+    if (need === 'dangerous-goods' && zone !== 'dangerous-goods') return false;
+    if (zone === 'dangerous-goods' && need !== 'dangerous-goods') return false;
+    // Bulky gear belongs in bulk storage.
+    if (need === 'bulk' && zone !== 'bulk') return false;
+  }
+  if (rules.cubeFit && sku.cube && slot.capacityCube && sku.cube > slot.capacityCube) return false;
+  if (rules.weightErgonomics && sku.weight && sku.weight > rules.weightLimit && slot.level > GOLDEN_LEVEL)
+    return false;
   return true;
 }
 
-function slotScore(slot: SlotRow, sku: SkuRow, allSlots: SlotRow[], skuById: Map<string, SkuRow>): number {
-  const travelCost = distanceToDock(slot) * forecastedPicks(sku);
-  const goldenPenalty = forecastedPicks(sku) >= 50 && slot.level !== GOLDEN_LEVEL ? 30 : 0;
-  const heavyPenalty = (sku.weight ?? 0) > 12 && slot.level > GOLDEN_LEVEL ? 80 : 0;
+function slotScore(
+  slot: SlotRow,
+  sku: SkuRow,
+  allSlots: SlotRow[],
+  skuById: Map<string, SkuRow>,
+  rules: RuleSet = DEFAULT_RULES
+): number {
+  const fp = forecastedPicks(sku);
+  const travelCost = distanceToDock(slot) * fp;
+  const goldenPenalty =
+    rules.goldenZone.enabled && fp >= rules.goldenZone.fastThreshold && slot.level !== GOLDEN_LEVEL
+      ? rules.goldenZone.weight
+      : 0;
+  const heavyPenalty =
+    rules.heavy.enabled && (sku.weight ?? 0) > rules.heavy.threshold && slot.level > GOLDEN_LEVEL
+      ? rules.heavy.weight
+      : 0;
   const cube = sku.cube ?? 1;
-  const replenishmentPenalty = slot.capacityCube ? (cube * forecastedPicks(sku)) / slot.capacityCube : 0;
+  const replenishmentPenalty =
+    rules.replenishment.enabled && slot.capacityCube
+      ? (rules.replenishment.weight * (cube * fp)) / slot.capacityCube
+      : 0;
 
   let affinityBonus = 0;
-  if (sku.affinityGroup) {
+  if (rules.affinity.enabled && sku.affinityGroup) {
     for (const neighbor of allSlots) {
       if (!neighbor.sku_id || neighbor.id === slot.id) continue;
       const other = skuById.get(neighbor.sku_id);
       if (!other || other.affinityGroup !== sku.affinityGroup) continue;
       const distance = Math.abs(neighbor.aisle - slot.aisle) + Math.abs(neighbor.bay - slot.bay);
-      if (distance <= 1) affinityBonus += 20;
-      else if (distance <= 3) affinityBonus += 8;
+      if (distance <= 1) affinityBonus += rules.affinity.nearBonus;
+      else if (distance <= 3) affinityBonus += rules.affinity.farBonus;
     }
   }
 
@@ -117,7 +136,8 @@ function uniqueReasons(sku: SkuRow, from: SlotRow, to: SlotRow): RecommendationR
 export function recommendMoves(
   slots: SlotRow[],
   skus: SkuRow[],
-  options: RecommendationOptions = {}
+  options: RecommendationOptions = {},
+  rules: RuleSet = DEFAULT_RULES
 ): MoveRecommendation[] {
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const skuById = new Map(skus.map((s) => [s.id, s]));
@@ -130,13 +150,15 @@ export function recommendMoves(
     for (const to of occupied) {
       if (to.id === from.id) continue;
       const targetSku = to.sku_id ? skuById.get(to.sku_id) : undefined;
-      if (!isCompatible(sku, to)) continue;
-      if (targetSku && !isCompatible(targetSku, from)) continue;
+      if (!isCompatible(sku, to, rules)) continue;
+      if (targetSku && !isCompatible(targetSku, from, rules)) continue;
 
       const before =
-        slotScore(from, sku, slots, skuById) + (targetSku ? slotScore(to, targetSku, slots, skuById) : 0);
+        slotScore(from, sku, slots, skuById, rules) +
+        (targetSku ? slotScore(to, targetSku, slots, skuById, rules) : 0);
       const after =
-        slotScore(to, sku, slots, skuById) + (targetSku ? slotScore(from, targetSku, slots, skuById) : 0);
+        slotScore(to, sku, slots, skuById, rules) +
+        (targetSku ? slotScore(from, targetSku, slots, skuById, rules) : 0);
       const improvement = before - after;
       if (improvement <= 0) continue;
 

@@ -7,6 +7,7 @@ import { KpiPanel } from '@/components/KpiPanel';
 import { ModuleNav, type ModuleId } from '@/components/ModuleNav';
 import { OrdersPanel } from '@/components/OrdersPanel';
 import { RecommendationsPanel } from '@/components/RecommendationsPanel';
+import { RulesPanel } from '@/components/RulesPanel';
 import { SimulationControls } from '@/components/SimulationControls';
 import { SlotsTable } from '@/components/SlotsTable';
 import { TwinPanel } from '@/components/TwinPanel';
@@ -43,6 +44,8 @@ export function HomePage() {
     baselineMetrics,
     recommendations,
     orders,
+    rules,
+    setRules,
     isSimulating,
     applying,
     importing,
@@ -59,8 +62,8 @@ export function HomePage() {
   const [viewMode, setViewMode] = useState<ViewMode>('abc');
 
   const colorById = useMemo(
-    () => slotColors(displaySlots, skus, viewMode),
-    [displaySlots, skus, viewMode]
+    () => slotColors(displaySlots, skus, viewMode, rules),
+    [displaySlots, skus, viewMode, rules]
   );
 
   const orderRoute = useMemo(() => {
@@ -139,6 +142,15 @@ export function HomePage() {
                     selectedSlotId={selectedSlotId}
                     onSelectSlot={setSelectedSlotId}
                   />
+                </div>
+              </div>
+            )}
+
+            {active === 'rules' && (
+              <div className="flex h-full flex-col">
+                <ModuleHeader title="Slotting Rules" subtitle="Constraints & weighted preferences the optimiser follows" />
+                <div className="min-h-0 flex-1 overflow-y-auto">
+                  <RulesPanel rules={rules} onChange={setRules} />
                 </div>
               </div>
             )}

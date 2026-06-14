@@ -1,5 +1,6 @@
 import { classifyAbc } from './metrics';
 import { forecastedPicks, isCompatible } from './recommendations';
+import { DEFAULT_RULES, type RuleSet } from './rules';
 import type { AbcClass, SkuRow, SlotRow } from './types';
 
 export type ViewMode = 'abc' | 'heat' | 'forecast' | 'compatibility';
@@ -35,7 +36,8 @@ export function heatColor(t: number): string {
 export function slotColors(
   slots: SlotRow[],
   skus: SkuRow[],
-  mode: ViewMode
+  mode: ViewMode,
+  rules: RuleSet = DEFAULT_RULES
 ): Map<string, string> {
   const skuById = new Map(skus.map((s) => [s.id, s]));
   const out = new Map<string, string>();
@@ -52,7 +54,7 @@ export function slotColors(
   if (mode === 'compatibility') {
     for (const slot of slots) {
       const sku = slot.sku_id ? skuById.get(slot.sku_id) : undefined;
-      out.set(slot.id, !sku || isCompatible(sku, slot) ? '#6f9a6a' : '#b3472f');
+      out.set(slot.id, !sku || isCompatible(sku, slot, rules) ? '#6f9a6a' : '#b3472f');
     }
     return out;
   }

@@ -12,6 +12,7 @@ import { computeMetrics, type Metrics } from '@/slotting/metrics';
 import { optimizeSlots } from '@/slotting/optimize';
 import { generateDemoOrders, type Order } from '@/slotting/orders';
 import { recommendMoves, type MoveRecommendation } from '@/slotting/recommendations';
+import { DEFAULT_RULES, type RuleSet } from '@/slotting/rules';
 import { SLOT_COUNT } from '@/slotting/seed';
 import type { SkuRow, SlotRow } from '@/slotting/types';
 
@@ -26,6 +27,8 @@ export interface Slotting {
   baselineMetrics: Metrics | null;
   recommendations: MoveRecommendation[];
   orders: Order[];
+  rules: RuleSet;
+  setRules: (rules: RuleSet) => void;
   isSimulating: boolean;
   applying: boolean;
   importing: boolean;
@@ -49,6 +52,7 @@ export function useSlotting(): Slotting {
   const [applying, setApplying] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
+  const [rules, setRules] = useState<RuleSet>(DEFAULT_RULES);
 
   const reload = useCallback(async () => {
     const [slotRows, skuRows] = await Promise.all([getSlots(), getSkus()]);
@@ -80,14 +84,14 @@ export function useSlotting(): Slotting {
     [displaySlots, skus]
   );
   const recommendations = useMemo(
-    () => (actualSlots.length ? recommendMoves(actualSlots, skus, { maxRecommendations: 12 }) : []),
-    [actualSlots, skus]
+    () => (actualSlots.length ? recommendMoves(actualSlots, skus, { maxRecommendations: 12 }, rules) : []),
+    [actualSlots, skus, rules]
   );
   const orders = useMemo(() => (skus.length ? generateDemoOrders(skus, 40) : []), [skus]);
 
   const simulate = useCallback(
-    () => setSimulatedSlots(optimizeSlots(actualSlots, skus)),
-    [actualSlots, skus]
+    () => setSimulatedSlots(optimizeSlots(actualSlots, skus, rules)),
+    [actualSlots, skus, rules]
   );
 
   const revert = useCallback(() => setSimulatedSlots(null), []);
@@ -141,6 +145,8 @@ export function useSlotting(): Slotting {
     baselineMetrics,
     recommendations,
     orders,
+    rules,
+    setRules,
     isSimulating: simulatedSlots !== null,
     applying,
     importing,
