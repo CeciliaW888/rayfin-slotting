@@ -7,6 +7,7 @@ import { KpiPanel } from '@/components/KpiPanel';
 import { ModuleNav, type ModuleId } from '@/components/ModuleNav';
 import { OrdersPanel } from '@/components/OrdersPanel';
 import { RecommendationsPanel } from '@/components/RecommendationsPanel';
+import { RulesInterview } from '@/components/RulesInterview';
 import { RulesPanel } from '@/components/RulesPanel';
 import { SimulationControls } from '@/components/SimulationControls';
 import { SlotsTable } from '@/components/SlotsTable';
@@ -61,6 +62,7 @@ export function HomePage() {
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('abc');
+  const [rulesView, setRulesView] = useState<'editor' | 'interview'>('editor');
 
   const colorById = useMemo(
     () => slotColors(displaySlots, skus, viewMode, rules),
@@ -154,9 +156,32 @@ export function HomePage() {
 
             {active === 'rules' && (
               <div className="flex h-full flex-col">
-                <ModuleHeader title="Slotting Rules" subtitle="Constraints & weighted preferences the optimiser follows" />
+                <div className="flex items-center justify-between gap-3 border-b border-warmborder bg-card px-5 py-3">
+                  <div>
+                    <h2 className="font-display text-base font-semibold text-ink">Slotting Rules</h2>
+                    <p className="text-xs text-ink2">Constraints &amp; weighted preferences the optimiser follows</p>
+                  </div>
+                  {rulesView === 'editor' && (
+                    <button
+                      onClick={() => setRulesView('interview')}
+                      className="shrink-0 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-accent-deep"
+                    >
+                      ✨ Generate from interview
+                    </button>
+                  )}
+                </div>
                 <div className="min-h-0 flex-1 overflow-y-auto">
-                  <RulesPanel rules={rules} onChange={setRules} learned={learnedAffinities} />
+                  {rulesView === 'editor' ? (
+                    <RulesPanel rules={rules} onChange={setRules} learned={learnedAffinities} />
+                  ) : (
+                    <RulesInterview
+                      onApply={(r) => {
+                        setRules(r);
+                        setRulesView('editor');
+                      }}
+                      onCancel={() => setRulesView('editor')}
+                    />
+                  )}
                 </div>
               </div>
             )}
