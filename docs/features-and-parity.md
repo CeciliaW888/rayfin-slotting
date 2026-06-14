@@ -17,10 +17,20 @@
 
 **Intelligence**
 - **Explainable move recommendations** — ranked by **annual $ payback**, with
-  reason codes, confidence, and move cost (heuristic optimisation, not ML yet).
+  reason codes, confidence, and move cost.
 - **What-if simulation** — optimise → before/after metrics → apply or revert.
 - **Dashboard KPIs** — slotting health, total pick travel, golden-zone
   compliance, mis-slotted count, with baseline delta chips.
+
+**Rules & AI/ML**
+- **Slotting Rules module** — editable hard constraints + soft-weighted
+  preferences (sliders + typed inputs); the optimiser is rule-driven and edits
+  re-run live.
+- **Learned affinities (ML)** — market-basket / association-rule mining
+  (support · confidence · **lift**) over the order book *discovers* product
+  families; a toggle feeds the learned groups to the optimiser.
+- **AI rule assistant** — interviews the SME and drafts a rule set for review
+  before applying (human-in-the-loop).
 
 **Operations & data**
 - **Orders** module with **pick-path tracing** over the 2D map.
@@ -36,11 +46,11 @@
   [architecture-and-hosting.md](architecture-and-hosting.md)).
 
 ## Roadmap (upcoming)
-- **Slotting Rules module** — manual rule editor (hard/soft/weighted) **and an
-  AI-interviews-the-SME → generates-rules** flow. *(in progress)*
-- **Genuine AI/ML** — market-basket **affinity mining** (learn product families
-  from the order book) and **demand forecasting** (replace the static forecast
-  multiplier). *(in progress)*
+- **LLM rule capture (BYO key)** — upgrade the rule assistant from the scripted
+  interview to a free-text "describe your DC in plain English" mode powered by
+  the Claude API (see the design note at the end). **This is a differentiator.**
+- **Demand forecasting (ML)** — replace the static forecast multiplier with a
+  time-series model on pick history.
 - **Scenarios** — create/compare slotting strategies.
 - **Comparison reports** — current vs scenario cost / travel / payback.
 - **Storage analysis** — cube utilisation, empty/over-capacity, reclaimable space.
@@ -61,11 +71,13 @@
 | What-if / scenario simulation | ✅ | 🟡 (what-if ✅, multi-scenario 🟦) |
 | Order tracing / pick paths | ✅ | ✅ (2D) |
 | Items / Slots master data | ✅ | ✅ |
-| Slotting rules engine + UI | ✅ | 🟦 *(in progress)* |
+| Slotting rules engine + UI | ✅ | ✅ |
 | Comparison reports (cost/ROI) | ✅ | 🟦 |
 | Storage / capacity analysis | ✅ | 🟦 |
 | Travel-network modelling | ✅ | 🟡 (visual 🟡, model 🟦) |
 | Demand forecasting | ✅ | 🟦 |
+| Learned affinities (market-basket ML) | 🟡 | ✅ |
+| AI rule capture (interview → rules) | ➖ | ✅ interview · 🟦 LLM free-text |
 | WMS integration, validated ROI, services | ✅ | ➖ (not targeted) |
 
 **Honest read:** we have strong parity on *visualisation* and *explainable
@@ -80,10 +92,38 @@ deep WMS integration / professional-services breadth.
 3. **Fabric-/Rayfin-native option** — fits the Microsoft data stack with a path
    to real-time and shared persistence.
 4. **Open & importable** — bring your own SKU CSV; demo anywhere with no infra.
-5. **AI knowledge capture (planned)** — an LLM that **interviews a SME and
-   generates slotting rules**, plus **learned** product affinities from real
-   orders — turning "AI/ML" from a label into something real.
+5. **Real AI/ML, not a label** —
+   - *Shipped:* an **AI rule assistant** that interviews the SME and generates a
+     rule set, and **learned product affinities** mined from real orders
+     (market-basket / lift) — turning "AI/ML" from a label into something real.
+   - *Future differentiator:* **LLM (Claude) free-text rule capture** — an SME
+     describes the DC in plain English and the model emits a validated rule set
+     (the commercial suites make you hand-configure every rule).
 
-> Differentiators 1–4 are shipped; 5 is the in-progress work. The strategy is
-> *not* to out-feature a mature suite, but to be the **accessible, explainable,
-> Microsoft-native** twin that quantifies the opportunity on your own data.
+> Differentiators 1–4 and the shipped parts of 5 are live; the LLM free-text
+> rule capture is the next differentiator. The strategy is *not* to out-feature a
+> mature suite, but to be the **accessible, explainable, Microsoft-native** twin
+> that quantifies the opportunity on your own data.
+
+## Future design note — LLM rule capture (the next differentiator)
+
+Upgrade the AI rule assistant from the scripted interview to an LLM-driven mode.
+
+- **UX:** a "Describe your DC in plain English" textarea (e.g. *"we run chilled
+  and hazmat zones, heaviest safe high-lift is 15 kg, fast movers must be at reach
+  height, keep the paint kits together"*) → the model returns a proposed
+  `RuleSet` → the **existing review/apply step is reused unchanged**.
+- **Model:** Claude (`claude-sonnet-4-6` for quality, `claude-haiku-4-5` for
+  speed/cost) via the Messages API with a **tool / structured-output schema that
+  mirrors the `RuleSet` type** — so the model can only emit values the optimiser
+  already runs (the validated, human-in-the-loop pattern from the research).
+- **Static-build constraint (we have no backend):** either (a) a **user-pasted
+  API key** used directly from the browser — Anthropic allows this via the
+  `anthropic-dangerous-direct-browser-access: true` header; document the
+  key-exposure caveat (demo only) — or (b) a small **serverless proxy** (Azure
+  Function / Cloudflare Worker) holding the key for production. Fall back to the
+  scripted interview when no key is present.
+- **Where it plugs in:** `src/components/RulesInterview.tsx` gains a second mode;
+  a new `src/services/ruleAssistant.ts` does the Claude call and returns a
+  `RuleSet`. Nothing else changes — the optimiser, rules model and review step
+  are already in place.
