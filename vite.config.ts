@@ -4,6 +4,9 @@ import { resolve } from 'path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  // '/' for local/preview and root hosts; set VITE_BASE=/rayfin-slotting/ for
+  // GitHub Pages (served from a repo subpath).
+  base: process.env.VITE_BASE || '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
