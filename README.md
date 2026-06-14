@@ -2,6 +2,10 @@
 
 A 3D digital twin of a distribution centre (DC) for diagnosing and improving product placement (slotting). Built on [Rayfin](https://github.com/microsoft/rayfin) with a React + React Three Fiber frontend.
 
+> **▶ Live demo (no backend):** https://ceciliaw888.github.io/rayfin-slotting/ — runs entirely in the browser on realistic in-memory data; nothing to install.
+
+**Docs:** [Architecture & hosting](docs/architecture-and-hosting.md) · [Features, roadmap & parity](docs/features-and-parity.md) · [Glossary](CONTEXT.md)
+
 > **Next architecture direction:** the workstation plan uses the **Rayfin backend** for persistent items, slots, orders, rules, scenarios, moves, and reports. See [`docs/digital-twin-plan.md`](docs/digital-twin-plan.md).
 
 The product direction combines DC visualisation and scenario comparison with AI-powered dynamic slotting: small, explainable, high-ROI moves ranked by payback rather than one-off manual re-slotting projects.
