@@ -39,6 +39,7 @@ function Slider({
   onChange: (v: number) => void;
   disabled?: boolean;
 }) {
+  const clamp = (n: number) => Math.min(max, Math.max(min, n));
   return (
     <div className={`flex items-center gap-3 py-1.5 ${disabled ? 'opacity-40' : ''}`}>
       <span className="w-40 shrink-0 text-xs text-ink2">{label}</span>
@@ -52,7 +53,19 @@ function Slider({
         onChange={(e) => onChange(Number(e.target.value))}
         className="h-1 flex-1 cursor-pointer accent-[#c4825a]"
       />
-      <span className="w-10 shrink-0 text-right font-mono text-xs tabular-nums text-ink">{value}</span>
+      <input
+        type="number"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        disabled={disabled}
+        onChange={(e) => {
+          const n = Number(e.target.value);
+          if (!Number.isNaN(n)) onChange(clamp(n));
+        }}
+        className="w-16 shrink-0 rounded-md border border-warmborder bg-card px-2 py-1 text-right font-mono text-xs tabular-nums text-ink focus:border-accent focus:outline-none disabled:cursor-not-allowed"
+      />
     </div>
   );
 }
@@ -66,7 +79,15 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-export function RulesPanel({ rules, onChange }: { rules: RuleSet; onChange: (r: RuleSet) => void }) {
+export function RulesPanel({
+  rules,
+  onChange,
+  learned = [],
+}: {
+  rules: RuleSet;
+  onChange: (r: RuleSet) => void;
+  learned?: { a: string; b: string; lift: number }[];
+}) {
   const set = (patch: Partial<RuleSet>) => onChange({ ...rules, ...patch });
 
   return (
@@ -184,6 +205,31 @@ export function RulesPanel({ rules, onChange }: { rules: RuleSet; onChange: (r: 
           onChange={(v) => set({ replenishment: { ...rules.replenishment, weight: v } })}
           disabled={!rules.replenishment.enabled}
         />
+      </Section>
+
+      <Section title="AI / ML — learned affinities">
+        <Toggle
+          label="Use learned affinities"
+          hint={
+            learned.length
+              ? `Market-basket mining found ${learned.length} co-picked pairs in the order book — group these instead of the hand-labelled families.`
+              : 'Mine the order book for co-picked product families (market-basket / lift).'
+          }
+          on={rules.useLearnedAffinity}
+          onChange={(v) => set({ useLearnedAffinity: v })}
+        />
+        {learned.length > 0 && (
+          <ul className="space-y-1 pt-2">
+            {learned.slice(0, 6).map((p, i) => (
+              <li key={i} className="flex items-center justify-between gap-3 py-0.5 text-xs">
+                <span className="font-mono text-ink">
+                  {p.a} <span className="text-muted">↔</span> {p.b}
+                </span>
+                <span className="font-mono tabular-nums text-muted">lift {p.lift.toFixed(1)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </Section>
     </div>
   );

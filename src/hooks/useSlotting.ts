@@ -7,6 +7,7 @@ import {
   reslot,
   seedIfEmpty,
 } from '@/services/slotting';
+import { learnedGroups, mineAffinities, type AffinityPair } from '@/slotting/affinity';
 import { parseSkuCsv } from '@/slotting/csv';
 import { computeMetrics, type Metrics } from '@/slotting/metrics';
 import { optimizeSlots } from '@/slotting/optimize';
@@ -27,6 +28,8 @@ export interface Slotting {
   baselineMetrics: Metrics | null;
   recommendations: MoveRecommendation[];
   orders: Order[];
+  /** Affinity pairs learned from the order book (market-basket mining). */
+  minedAffinities: AffinityPair[];
   rules: RuleSet;
   setRules: (rules: RuleSet) => void;
   isSimulating: boolean;
@@ -83,15 +86,26 @@ export function useSlotting(): Slotting {
     () => (displaySlots.length ? computeMetrics(displaySlots, skus) : null),
     [displaySlots, skus]
   );
-  const recommendations = useMemo(
-    () => (actualSlots.length ? recommendMoves(actualSlots, skus, { maxRecommendations: 12 }, rules) : []),
-    [actualSlots, skus, rules]
-  );
   const orders = useMemo(() => (skus.length ? generateDemoOrders(skus, 40) : []), [skus]);
+  const minedAffinities = useMemo(
+    () => (orders.length ? mineAffinities(orders, skus) : []),
+    [orders, skus]
+  );
+  // When the rule is on, feed the recommender affinity groups LEARNED from the
+  // order book instead of the hand-labelled ones.
+  const effectiveSkus = useMemo(() => {
+    if (!rules.useLearnedAffinity || !minedAffinities.length) return skus;
+    const groups = learnedGroups(minedAffinities);
+    return skus.map((s) => ({ ...s, affinityGroup: groups.get(s.id) ?? null }));
+  }, [skus, rules.useLearnedAffinity, minedAffinities]);
+  const recommendations = useMemo(
+    () => (actualSlots.length ? recommendMoves(actualSlots, effectiveSkus, { maxRecommendations: 12 }, rules) : []),
+    [actualSlots, effectiveSkus, rules]
+  );
 
   const simulate = useCallback(
-    () => setSimulatedSlots(optimizeSlots(actualSlots, skus, rules)),
-    [actualSlots, skus, rules]
+    () => setSimulatedSlots(optimizeSlots(actualSlots, effectiveSkus, rules)),
+    [actualSlots, effectiveSkus, rules]
   );
 
   const revert = useCallback(() => setSimulatedSlots(null), []);
@@ -145,6 +159,7 @@ export function useSlotting(): Slotting {
     baselineMetrics,
     recommendations,
     orders,
+    minedAffinities,
     rules,
     setRules,
     isSimulating: simulatedSlots !== null,

@@ -44,6 +44,7 @@ export function HomePage() {
     baselineMetrics,
     recommendations,
     orders,
+    minedAffinities,
     rules,
     setRules,
     isSimulating,
@@ -70,6 +71,11 @@ export function HomePage() {
     const order = orders.find((o) => o.id === selectedOrderId);
     return order ? pickRoute(order, displaySlots) : null;
   }, [orders, selectedOrderId, displaySlots]);
+
+  const learnedAffinities = useMemo(() => {
+    const code = new Map(skus.map((s) => [s.id, s.code]));
+    return minedAffinities.map((p) => ({ a: code.get(p.a) ?? p.a, b: code.get(p.b) ?? p.b, lift: p.lift }));
+  }, [minedAffinities, skus]);
 
   return (
     <div className="flex h-screen flex-col bg-page">
@@ -150,7 +156,7 @@ export function HomePage() {
               <div className="flex h-full flex-col">
                 <ModuleHeader title="Slotting Rules" subtitle="Constraints & weighted preferences the optimiser follows" />
                 <div className="min-h-0 flex-1 overflow-y-auto">
-                  <RulesPanel rules={rules} onChange={setRules} />
+                  <RulesPanel rules={rules} onChange={setRules} learned={learnedAffinities} />
                 </div>
               </div>
             )}

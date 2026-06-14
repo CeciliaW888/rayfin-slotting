@@ -22,6 +22,10 @@ export interface RuleSet {
   affinity: { enabled: boolean; nearBonus: number; farBonus: number };
   /** Soft: avoid replenishment pressure (high throughput vs small slot). */
   replenishment: { enabled: boolean; weight: number };
+
+  /** Use affinity groups LEARNED from the order book (market-basket mining)
+   *  instead of the hand-labelled ones. */
+  useLearnedAffinity: boolean;
 }
 
 export const DEFAULT_RULES: RuleSet = {
@@ -33,4 +37,5 @@ export const DEFAULT_RULES: RuleSet = {
   heavy: { enabled: true, weight: 80, threshold: 12 },
   affinity: { enabled: true, nearBonus: 20, farBonus: 8 },
   replenishment: { enabled: true, weight: 1 },
+  useLearnedAffinity: false,
 };
