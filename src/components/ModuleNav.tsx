@@ -2,6 +2,7 @@ export type ModuleId =
   | 'dashboard'
   | 'twin'
   | 'moves'
+  | 'orders'
   | 'items'
   | 'slots'
   | 'scenarios'
@@ -20,6 +21,7 @@ export const MODULES: ModuleDef[] = [
   { id: 'dashboard', label: 'Dashboard', hint: 'KPIs & opportunity', ready: true, icon: 'M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z' },
   { id: 'twin', label: 'Digital Twin', hint: '3D / 2D warehouse', ready: true, icon: 'M12 2 2 7l10 5 10-5-10-5Zm0 7L2 14l10 5 10-5M2 14v3l10 5 10-5v-3' },
   { id: 'moves', label: 'Moves', hint: 'AI recommendations', ready: true, icon: 'M5 12h14M13 6l6 6-6 6' },
+  { id: 'orders', label: 'Orders', hint: 'Pick-path tracing', ready: true, icon: 'M9 5h6a2 2 0 0 1 2 2v12l-5-3-5 3V7a2 2 0 0 1 2-2Z' },
   { id: 'items', label: 'Items', hint: 'SKU master', ready: true, icon: 'M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z' },
   { id: 'slots', label: 'Slots', hint: 'Locations', ready: true, icon: 'M3 3h7v7H3V3Zm11 0h7v7h-7V3ZM3 14h7v7H3v-7Zm11 0h7v7h-7v-7Z' },
   { id: 'scenarios', label: 'Scenarios', hint: 'Compare strategies', ready: false, icon: 'M4 4v16M4 8h12l-2-2m2 2-2 2M4 16h8l-2-2m2 2-2 2' },

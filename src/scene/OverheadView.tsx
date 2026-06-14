@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import { EMPTY_COLOR } from '@/slotting/colors';
+import type { PickRoute } from '@/slotting/orders';
 import { GOLDEN_LEVEL } from '@/slotting/types';
 import type { SlotRow } from '@/slotting/types';
 
@@ -32,28 +33,45 @@ export function OverheadView({
   colorById,
   selectedSlotId,
   onSelectSlot,
+  route,
 }: {
   slots: SlotRow[];
   colorById: Map<string, string>;
   selectedSlotId: string | null;
   onSelectSlot: (slotId: string) => void;
+  route?: PickRoute | null;
 }) {
-  const { aisles, bays, levels, slotAt, zoneByAisle } = useMemo(() => {
+  const { aisles, bays, levels, slotAt, slotById, zoneByAisle } = useMemo(() => {
     const aisles = [...new Set(slots.map((s) => s.aisle))].sort((a, b) => a - b);
     const bays = [...new Set(slots.map((s) => s.bay))].sort((a, b) => a - b);
     const levels = [...new Set(slots.map((s) => s.level))].sort((a, b) => b - a); // top→bottom
     const slotAt = new Map<string, SlotRow>();
+    const slotById = new Map<string, SlotRow>();
     const zoneByAisle = new Map<number, string>();
     for (const s of slots) {
       slotAt.set(`${s.aisle}-${s.bay}-${s.level}`, s);
+      slotById.set(s.id, s);
       if (s.zone && !zoneByAisle.has(s.aisle)) zoneByAisle.set(s.aisle, s.zone);
     }
-    return { aisles, bays, levels, slotAt, zoneByAisle };
+    return { aisles, bays, levels, slotAt, slotById, zoneByAisle };
   }, [slots]);
 
   const width = LEFT + bays.length * (CW + GAP) + GAP;
   const height = TOP + aisles.length * (CH + GAP) + GAP;
   const bandH = CH / levels.length;
+
+  // Centre of a location cell, used to draw the order pick-path over the map.
+  const centerOf = (slot: SlotRow) => {
+    const c = bays.indexOf(slot.bay);
+    const r = aisles.indexOf(slot.aisle);
+    return { x: LEFT + c * (CW + GAP) + CW / 2, y: TOP + r * (CH + GAP) + CH / 2 };
+  };
+  const dockAnchor = { x: LEFT + (bays.length - 1) * (CW + GAP) + CW / 2, y: 30 };
+
+  const routePoints =
+    route && route.stops.length
+      ? [dockAnchor, ...route.stops.map((s) => slotById.get(s.slotId)).filter((s): s is SlotRow => !!s).map(centerOf), dockAnchor]
+      : [];
 
   return (
     <div className="h-full w-full overflow-auto bg-[#eef2f4] p-4">
@@ -143,6 +161,30 @@ export function OverheadView({
             </g>
           );
         })}
+
+        {/* Order pick-path: dock → stops (nearest-first) → dock */}
+        {routePoints.length > 1 && (
+          <g>
+            <polyline
+              points={routePoints.map((p) => `${p.x},${p.y}`).join(' ')}
+              fill="none"
+              stroke="#c4522e"
+              strokeWidth={2.5}
+              strokeLinejoin="round"
+              strokeDasharray="1 7"
+              strokeLinecap="round"
+              opacity={0.9}
+            />
+            {routePoints.slice(1, -1).map((p, i) => (
+              <g key={i}>
+                <circle cx={p.x} cy={p.y} r={9} fill="#c4522e" />
+                <text x={p.x} y={p.y + 3.5} textAnchor="middle" fontSize={10} fontWeight={700} fill="#fff">
+                  {i + 1}
+                </text>
+              </g>
+            ))}
+          </g>
+        )}
       </svg>
 
       <p className="mx-auto mt-3 max-w-4xl text-center text-[11px] text-gray-400">

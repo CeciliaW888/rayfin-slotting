@@ -5,13 +5,16 @@ import { IntelligenceSummary } from '@/components/IntelligenceSummary';
 import { ItemsTable } from '@/components/ItemsTable';
 import { KpiPanel } from '@/components/KpiPanel';
 import { ModuleNav, type ModuleId } from '@/components/ModuleNav';
+import { OrdersPanel } from '@/components/OrdersPanel';
 import { RecommendationsPanel } from '@/components/RecommendationsPanel';
 import { SimulationControls } from '@/components/SimulationControls';
 import { SlotsTable } from '@/components/SlotsTable';
 import { TwinPanel } from '@/components/TwinPanel';
 import { WorstSlottedList } from '@/components/WorstSlottedList';
 import { useSlotting } from '@/hooks/useSlotting';
+import { OverheadView } from '@/scene/OverheadView';
 import { slotColors, type ViewMode } from '@/slotting/colors';
+import { pickRoute } from '@/slotting/orders';
 
 function ModuleHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
@@ -39,6 +42,7 @@ export function HomePage() {
     metrics,
     baselineMetrics,
     recommendations,
+    orders,
     isSimulating,
     applying,
     importing,
@@ -51,12 +55,18 @@ export function HomePage() {
 
   const [active, setActive] = useState<ModuleId>('twin');
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('abc');
 
   const colorById = useMemo(
     () => slotColors(displaySlots, skus, viewMode),
     [displaySlots, skus, viewMode]
   );
+
+  const orderRoute = useMemo(() => {
+    const order = orders.find((o) => o.id === selectedOrderId);
+    return order ? pickRoute(order, displaySlots) : null;
+  }, [orders, selectedOrderId, displaySlots]);
 
   return (
     <div className="flex h-screen flex-col bg-gray-50">
@@ -129,6 +139,38 @@ export function HomePage() {
                     selectedSlotId={selectedSlotId}
                     onSelectSlot={setSelectedSlotId}
                   />
+                </div>
+              </div>
+            )}
+
+            {active === 'orders' && (
+              <div className="flex h-full flex-col">
+                <ModuleHeader
+                  title="Orders"
+                  subtitle={
+                    orderRoute
+                      ? `${selectedOrderId} · ${orderRoute.stops.length} picks · ${orderRoute.distance.toFixed(0)} travel`
+                      : 'Select an order to trace its pick path'
+                  }
+                />
+                <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+                  <div className="h-48 shrink-0 border-b border-gray-200 md:h-auto md:w-72 md:border-b-0 md:border-r">
+                    <OrdersPanel
+                      orders={orders}
+                      slots={displaySlots}
+                      selectedOrderId={selectedOrderId}
+                      onSelectOrder={setSelectedOrderId}
+                    />
+                  </div>
+                  <div className="min-h-0 flex-1">
+                    <OverheadView
+                      slots={displaySlots}
+                      colorById={colorById}
+                      selectedSlotId={selectedSlotId}
+                      onSelectSlot={setSelectedSlotId}
+                      route={orderRoute}
+                    />
+                  </div>
                 </div>
               </div>
             )}
