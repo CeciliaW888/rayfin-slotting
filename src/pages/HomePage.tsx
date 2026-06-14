@@ -72,9 +72,9 @@ export function HomePage() {
     <div className="flex h-screen flex-col bg-gray-50">
       <header className="flex shrink-0 items-center justify-between gap-4 border-b border-gray-200 bg-white px-4 py-3 sm:px-6">
         <div className="min-w-0">
-          <h1 className="text-base font-bold text-gray-900 sm:text-lg">Rayfin Slotting · DC Digital Twin</h1>
+          <h1 className="text-base font-bold text-gray-900 sm:text-lg">Slotting Digital Twin</h1>
           <p className="hidden text-xs text-gray-500 sm:block">
-            OptiSlot-style workstation — velocity, forecast, affinity, cube &amp; fit-aware slotting
+            Velocity, forecast, affinity, cube &amp; fit-aware slotting workstation
           </p>
         </div>
         <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">

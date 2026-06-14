@@ -232,7 +232,7 @@ function BuildingShell({ showWalls }: { showWalls: boolean }) {
         </group>
       )}
 
-      {/* blue structural columns, visible in the OptiSlot aisle walkthrough */}
+      {/* blue structural columns, visible along the warehouse aisle */}
       {[3.2, 8.8, 14.4, 20].map((x) =>
         [4.8, 13.6].map((z) => (
           <mesh key={`${x}-${z}`} position={[x, 2.2, z]}>
@@ -295,7 +295,7 @@ function RackSlot({
         <meshStandardMaterial color={panelColor} roughness={0.55} />
       </mesh>
 
-      {/* white location label strip, like the OptiSlot rendered rack faces */}
+      {/* white location label strip, like rendered rack faces */}
       <mesh position={[0, 0.31, 0.115]}>
         <boxGeometry args={[1.42, 0.18, 0.045]} />
         <meshStandardMaterial color="#eef6f8" />

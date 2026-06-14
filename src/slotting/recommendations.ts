@@ -110,7 +110,7 @@ function uniqueReasons(sku: SkuRow, from: SlotRow, to: SlotRow): RecommendationR
 
 /**
  * AI-inspired dynamic slotting recommender. It uses the same observable inputs
- * described in the Lucas/OptiSlot research videos — velocity, forecast uplift,
+ * drawn from industry slotting research — velocity, forecast uplift,
  * SKU-slot compatibility, cube/replenishment pressure, affinity and ergonomics —
  * to rank small opportunistic swaps by estimated payback.
  */

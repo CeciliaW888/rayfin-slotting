@@ -1,12 +1,12 @@
-# OptiSlot-Style DC Digital Twin Plan
+# Slotting Digital Twin Plan
 
 ## Decision
 
-Use the **Rayfin backend** as the target backend for the next production-ready iteration. The current demo mode remains useful for visual prototyping, but the OptiSlot-style workstation should be designed around Rayfin entities and services that can support persistent scenarios, orders, rules, move workflows, reports, and richer warehouse master data.
+Use the **Rayfin backend** as the target backend for the next production-ready iteration. The current demo mode remains useful for visual prototyping, but the commercial slotting tools-style workstation should be designed around Rayfin entities and services that can support persistent scenarios, orders, rules, move workflows, reports, and richer warehouse master data.
 
-## Evidence from OptiSlot video and screenshots
+## Evidence from reference video and screenshots
 
-The FORTNA OptiSlot DC video and screenshots show a full slotting workstation, not just a 3D model.
+The the vendor commercial slotting tools DC video and screenshots show a full slotting workstation, not just a 3D model.
 
 Visible/claimed capabilities:
 
@@ -29,12 +29,12 @@ Visible/claimed capabilities:
 
 2. **Racks and goods are too primitive**
    - Current visual language is still cube-like.
-   - OptiSlot shows vivid shelves, racking, goods, labels, and aisle context.
+   - Commercial tools show vivid shelves, racking, goods, labels, and aisle context.
    - We need pallets, cartons, totes, rack beams/uprights, slot labels, floor markings, and operational signs.
 
 3. **Functionality needs to be module-based**
    - Current prototype is a single screen with panels.
-   - OptiSlot is a workstation with left navigation and dedicated modules.
+   - commercial slotting tools is a workstation with left navigation and dedicated modules.
 
 ## Target product shape
 
@@ -134,7 +134,7 @@ Fields:
 
 ### 4. Overhead View
 
-Purpose: OptiSlot-style 2D operational map.
+Purpose: commercial slotting tools-style 2D operational map.
 
 Features:
 
@@ -287,7 +287,7 @@ Actions:
 
 ### 13. Comparison Reports
 
-Purpose: recreate OptiSlot-style Comp. Reports.
+Purpose: recreate industry-standard Comp. Reports.
 
 Inputs:
 
@@ -393,7 +393,7 @@ Support:
 
 ## AI differentiators
 
-Go beyond OptiSlot with explainable recommendations:
+Go beyond commercial tools with explainable recommendations:
 
 - Forecast-aware slotting.
 - Affinity-aware slotting.
@@ -421,7 +421,7 @@ Reasons:
 
 ### Sprint 1 — Product shell and visual credibility
 
-- Add OptiSlot-style left navigation.
+- Add commercial slotting tools-style left navigation.
 - Add module routing/state.
 - Add 2D overhead view.
 - Improve 3D digital twin with realistic racks/goods.
@@ -463,7 +463,7 @@ Reasons:
 
 The next demo should satisfy these checks:
 
-- User can navigate through left-side OptiSlot-style modules.
+- User can navigate through left-side modules.
 - 3D view visibly resembles a DC: racks, goods, aisles, docks, signs, floor markings.
 - User can walk/focus inside an aisle and hide/show walls.
 - 2D overhead view shows zones, aisles, dock, travel network, and heatmap colours.

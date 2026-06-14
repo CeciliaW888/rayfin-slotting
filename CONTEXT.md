@@ -1,4 +1,4 @@
-# Slotting Twin
+# Slotting Digital Twin
 
 A digital twin of a single distribution centre used to diagnose and improve product placement (slotting). Built on the local Rayfin stack; presented as a work demo.
 
