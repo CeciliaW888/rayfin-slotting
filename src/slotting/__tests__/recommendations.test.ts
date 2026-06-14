@@ -67,17 +67,17 @@ describe('recommendMoves', () => {
     expect(recs).toHaveLength(1);
   });
 
-  it('respects compatibility and never recommends a chilled SKU into an ambient-only slot', () => {
-    const chilledFast = sku({ id: 'milk', category: 'Chilled', picksPerDay: 200, cube: 1 });
-    const ambientSlow = sku({ id: 'bolts', category: 'Ambient', picksPerDay: 1, cube: 1 });
+  it('respects zoning and never recommends a dangerous-goods SKU into a general slot', () => {
+    const dgFast = sku({ id: 'solvent', category: 'Welding', picksPerDay: 200, cube: 1 });
+    const generalSlow = sku({ id: 'bolts', category: 'Fasteners', picksPerDay: 1, cube: 1 });
     const slots = [
-      slot({ id: 'chilled-far', x: far.x, y: far.y, sku_id: chilledFast.id, zone: 'chilled' }),
-      slot({ id: 'ambient-near', x: near.x, y: near.y, sku_id: ambientSlow.id, zone: 'ambient' }),
+      slot({ id: 'dg-far', x: far.x, y: far.y, sku_id: dgFast.id, zone: 'dangerous-goods' }),
+      slot({ id: 'general-near', x: near.x, y: near.y, sku_id: generalSlow.id, zone: 'general' }),
     ];
 
-    const recs = recommendMoves(slots, [chilledFast, ambientSlow]);
+    const recs = recommendMoves(slots, [dgFast, generalSlow]);
 
-    expect(recs.find((r) => r.skuId === 'milk' && r.toSlotId === 'ambient-near')).toBeUndefined();
+    expect(recs.find((r) => r.skuId === 'solvent' && r.toSlotId === 'general-near')).toBeUndefined();
   });
 
   it('uses forecast uplift so a promo item can outrank a historically faster SKU', () => {

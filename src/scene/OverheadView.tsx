@@ -6,14 +6,14 @@ import { GOLDEN_LEVEL } from '@/slotting/types';
 import type { SlotRow } from '@/slotting/types';
 
 const ZONE_TINT: Record<string, string> = {
-  chilled: '#eaf6fb',
-  hazmat: '#fdf0e6',
-  ambient: '#f1f6ee',
+  'dangerous-goods': '#fdf0e6',
+  bulk: '#eef2f7',
+  general: '#f1f6ee',
 };
 const ZONE_LABEL: Record<string, string> = {
-  chilled: 'CHILLED',
-  hazmat: 'HAZMAT / BULK',
-  ambient: 'AMBIENT PICK',
+  'dangerous-goods': 'DANGEROUS GOODS',
+  bulk: 'BULK STORE',
+  general: 'GENERAL PICK',
 };
 
 const CW = 70; // location cell width
@@ -103,7 +103,7 @@ export function OverheadView({
         ))}
 
         {aisles.map((aisle, r) => {
-          const zone = zoneByAisle.get(aisle) ?? 'ambient';
+          const zone = zoneByAisle.get(aisle) ?? 'general';
           const rowY = TOP + r * (CH + GAP);
           return (
             <g key={`aisle-${aisle}`}>
@@ -114,7 +114,7 @@ export function OverheadView({
                 width={width - 8}
                 height={CH}
                 rx={6}
-                fill={ZONE_TINT[zone] ?? ZONE_TINT.ambient}
+                fill={ZONE_TINT[zone] ?? ZONE_TINT.general}
               />
               <text x={14} y={rowY + CH / 2 - 6} fontSize={12} fontWeight={700} fill="#334155">
                 AISLE {aisle}

@@ -251,8 +251,8 @@ function ZoneBands({ slots }: { slots: SlotRow[] }) {
     <group>
       {aisles.map((aisle) => {
         const slot = slots.find((s) => s.aisle === aisle);
-        const color = slot?.zone === 'chilled' ? '#bae6fd' : slot?.zone === 'hazmat' ? '#fed7aa' : '#dcfce7';
-        const label = slot?.zone === 'chilled' ? 'CHILLED' : slot?.zone === 'hazmat' ? 'HAZMAT / BULK' : 'AMBIENT PICK';
+        const color = slot?.zone === 'dangerous-goods' ? '#fed7aa' : slot?.zone === 'bulk' ? '#e2e8f0' : '#dcfce7';
+        const label = slot?.zone === 'dangerous-goods' ? 'DANGEROUS GOODS' : slot?.zone === 'bulk' ? 'BULK STORE' : 'GENERAL PICK';
         const z = aisle * 3;
         return (
           <group key={aisle}>

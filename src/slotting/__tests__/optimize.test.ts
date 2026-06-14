@@ -40,16 +40,16 @@ describe('optimizeSlots', () => {
   });
 
   it('respects zone compatibility when assigning fastest movers', () => {
-    const chilled = { ...sku('milk', 200), category: 'Chilled' };
-    const ambient = { ...sku('bolts', 10), category: 'Ambient' };
+    const dangerous = { ...sku('solvent', 200), category: 'Welding' };
+    const general = { ...sku('bolts', 10), category: 'Fasteners' };
     const next = optimizeSlots(
       [
-        { ...slot('ambient-near', NEAR_DOCK.x, NEAR_DOCK.y), zone: 'ambient' },
-        { ...slot('chilled-far', FAR_FROM_DOCK.x, FAR_FROM_DOCK.y), zone: 'chilled' },
+        { ...slot('general-near', NEAR_DOCK.x, NEAR_DOCK.y), zone: 'general' },
+        { ...slot('dg-far', FAR_FROM_DOCK.x, FAR_FROM_DOCK.y), zone: 'dangerous-goods' },
       ],
-      [chilled, ambient]
+      [dangerous, general]
     );
-    expect(next.find((s) => s.id === 'chilled-far')?.sku_id).toBe('milk');
-    expect(next.find((s) => s.id === 'ambient-near')?.sku_id).toBe('bolts');
+    expect(next.find((s) => s.id === 'dg-far')?.sku_id).toBe('solvent');
+    expect(next.find((s) => s.id === 'general-near')?.sku_id).toBe('bolts');
   });
 });

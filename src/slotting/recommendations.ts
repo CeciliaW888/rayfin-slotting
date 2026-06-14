@@ -48,17 +48,30 @@ export function forecastedPicks(sku: SkuRow): number {
   return sku.picksPerDay * multiplier;
 }
 
-export function isCompatible(sku: SkuRow, slot: SlotRow): boolean {
-  const category = normalise(sku.category);
-  const zone = normalise(slot.zone);
-  const storageType = normalise(slot.storageType);
+// Dangerous goods (flammables, gases, chemicals) must be segregated; large
+// gear belongs in bulk storage. Everything else is general pick stock.
+const DANGEROUS_GOODS = new Set(['lubricants', 'spill control', 'welding']);
+const BULK_GOODS = new Set(['storage & handling']);
 
-  if (zone && zone !== 'ambient' && !category.includes(zone)) return false;
-  if (category.includes('chilled') && zone && zone !== 'chilled') return false;
-  if (category.includes('hazmat') && zone && zone !== 'hazmat') return false;
+export function requiredZone(category: string): 'dangerous-goods' | 'bulk' | 'general' {
+  const c = normalise(category);
+  if (DANGEROUS_GOODS.has(c)) return 'dangerous-goods';
+  if (BULK_GOODS.has(c)) return 'bulk';
+  return 'general';
+}
+
+export function isCompatible(sku: SkuRow, slot: SlotRow): boolean {
+  const need = requiredZone(sku.category);
+  const zone = normalise(slot.zone);
+
+  // The dangerous-goods bay only holds DG stock, and DG stock only goes there.
+  if (need === 'dangerous-goods' && zone !== 'dangerous-goods') return false;
+  if (zone === 'dangerous-goods' && need !== 'dangerous-goods') return false;
+  // Bulky gear belongs in bulk storage.
+  if (need === 'bulk' && zone !== 'bulk') return false;
+
   if (sku.cube && slot.capacityCube && sku.cube > slot.capacityCube) return false;
   if (sku.weight && sku.weight > 20 && slot.level > GOLDEN_LEVEL) return false;
-  if (category.includes('bulky') && storageType && !storageType.includes('bulk')) return false;
   return true;
 }
 
