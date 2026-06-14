@@ -23,8 +23,8 @@ export function ViewControls({
             onClick={() => onChange(m.id)}
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
               mode === m.id
-                ? 'bg-gray-900 text-white'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-accent/15 text-accent-deep'
+                : 'text-ink2 hover:text-ink'
             }`}
           >
             {m.label}
@@ -77,10 +77,10 @@ function CompatibilityLegend() {
   return (
     <div className="flex gap-3 text-xs text-gray-500">
       <span className="inline-flex items-center gap-1.5">
-        <span className="inline-block h-3 w-3 rounded-sm bg-[#9fbf88]" /> fits rules
+        <span className="inline-block h-3 w-3 rounded-sm bg-[#6f9a6a]" /> fits rules
       </span>
       <span className="inline-flex items-center gap-1.5">
-        <span className="inline-block h-3 w-3 rounded-sm bg-[#c4522e]" /> needs review
+        <span className="inline-block h-3 w-3 rounded-sm bg-[#b3472f]" /> needs review
       </span>
     </div>
   );

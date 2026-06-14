@@ -168,7 +168,7 @@ export function OverheadView({
             <polyline
               points={routePoints.map((p) => `${p.x},${p.y}`).join(' ')}
               fill="none"
-              stroke="#c4522e"
+              stroke="#c4825a"
               strokeWidth={2.5}
               strokeLinejoin="round"
               strokeDasharray="1 7"
@@ -177,7 +177,7 @@ export function OverheadView({
             />
             {routePoints.slice(1, -1).map((p, i) => (
               <g key={i}>
-                <circle cx={p.x} cy={p.y} r={9} fill="#c4522e" />
+                <circle cx={p.x} cy={p.y} r={9} fill="#c4825a" />
                 <text x={p.x} y={p.y + 3.5} textAnchor="middle" fontSize={10} fontWeight={700} fill="#fff">
                   {i + 1}
                 </text>

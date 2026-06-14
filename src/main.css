@@ -8,7 +8,20 @@
   --color-blue-500: oklch(0.623 0.214 259.1);
   --color-blue-600: oklch(0.546 0.245 262.9);
   --color-blue-700: oklch(0.488 0.243 264.4);
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* One system: warm "editorial, ops-tuned" chrome. Terracotta = action/selection ONLY. */
+  --color-accent: #c4825a;
+  --color-accent-deep: #a8633b;
+  --color-page: #f5f0eb;
+  --color-card: #ffffff;
+  --color-warmborder: #e6ddd1;
+  --color-ink: #2d2d2d;
+  --color-ink2: #6f675d;
+  --color-muted: #9a9085;
+
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
 }
 
 @layer base {
@@ -17,11 +30,12 @@
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+    border-color: var(--color-warmborder, currentColor);
   }
 
   body {
     font-family: var(--font-sans);
+    color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

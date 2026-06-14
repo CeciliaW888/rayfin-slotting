@@ -52,8 +52,8 @@ export function RecommendationsPanel({
           <li key={`${rec.skuId}-${rec.fromSlotId}-${rec.toSlotId}`}>
             <button
               onClick={() => onSelectSlot(rec.fromSlotId)}
-              className={`w-full rounded-xl border bg-white px-3 py-3 text-left text-sm transition-colors ${
-                isSelected ? 'border-orange-400 bg-orange-50' : 'border-gray-100 hover:border-gray-300'
+              className={`w-full rounded-xl border bg-card px-3 py-3 text-left text-sm transition-colors ${
+                isSelected ? 'border-accent bg-accent/10' : 'border-warmborder hover:border-accent/40'
               }`}
             >
               <div className="flex items-start justify-between gap-3">

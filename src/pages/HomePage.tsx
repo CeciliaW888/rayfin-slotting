@@ -18,9 +18,9 @@ import { pickRoute } from '@/slotting/orders';
 
 function ModuleHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className="border-b border-gray-200 bg-white px-5 py-3">
-      <h2 className="text-sm font-bold text-gray-900">{title}</h2>
-      <p className="text-xs text-gray-500">{subtitle}</p>
+    <div className="border-b border-warmborder bg-card px-5 py-3">
+      <h2 className="font-display text-base font-semibold text-ink">{title}</h2>
+      <p className="text-xs text-ink2">{subtitle}</p>
     </div>
   );
 }
@@ -69,15 +69,15 @@ export function HomePage() {
   }, [orders, selectedOrderId, displaySlots]);
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50">
-      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-gray-200 bg-white px-4 py-3 sm:px-6">
+    <div className="flex h-screen flex-col bg-page">
+      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-warmborder bg-card px-4 py-3 sm:px-6">
         <div className="min-w-0">
-          <h1 className="text-base font-bold text-gray-900 sm:text-lg">Slotting Digital Twin</h1>
-          <p className="hidden text-xs text-gray-500 sm:block">
+          <h1 className="font-display text-lg font-semibold text-ink sm:text-xl">Slotting Digital Twin</h1>
+          <p className="hidden text-xs text-ink2 sm:block">
             Velocity, forecast, affinity, cube &amp; fit-aware slotting workstation
           </p>
         </div>
-        <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+        <span className="shrink-0 rounded-full border border-warmborder bg-card px-2.5 py-1 font-mono text-[11px] font-medium text-muted">
           Demo data
         </span>
       </header>
@@ -108,7 +108,7 @@ export function HomePage() {
                 <ModuleHeader title="Dashboard" subtitle="Slotting health and the size of the prize" />
                 <div className="flex-1 space-y-6 overflow-y-auto p-5">
                   <IntelligenceSummary recommendations={recommendations} skus={skus} />
-                  <KpiPanel metrics={metrics} />
+                  <KpiPanel metrics={metrics} baseline={baselineMetrics} />
                   <section>
                     <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
                       What-if optimisation

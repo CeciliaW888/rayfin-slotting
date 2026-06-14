@@ -118,7 +118,7 @@ function LabelSprite({
     ctx.fillStyle = bg;
     roundRect(ctx, 18, 22, 476, 116, 22);
     ctx.fill();
-    ctx.font = '700 44px Inter, system-ui, sans-serif';
+    ctx.font = '600 40px "JetBrains Mono", ui-monospace, monospace';
     ctx.fillStyle = color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

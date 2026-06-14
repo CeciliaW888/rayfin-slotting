@@ -36,8 +36,8 @@ export function ModuleNav({
   onSelect: (id: ModuleId) => void;
 }) {
   return (
-    <nav className="flex shrink-0 gap-1 overflow-x-auto border-b border-gray-200 bg-white p-2 md:w-56 md:flex-col md:gap-0.5 md:overflow-x-visible md:overflow-y-auto md:border-b-0 md:border-r md:p-3">
-      <p className="hidden px-2 pb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 md:block">
+    <nav className="flex shrink-0 gap-1 overflow-x-auto border-b border-warmborder bg-page p-2 md:w-56 md:flex-col md:gap-0.5 md:overflow-x-visible md:overflow-y-auto md:border-b-0 md:border-r md:p-3">
+      <p className="hidden px-2 pb-2 text-[10px] font-semibold uppercase tracking-wider text-muted md:block">
         Workstation
       </p>
       {MODULES.map((m) => {
@@ -48,12 +48,12 @@ export function ModuleNav({
             onClick={() => onSelect(m.id)}
             disabled={!m.ready}
             className={[
-              'flex shrink-0 items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors',
+              'flex shrink-0 items-center gap-3 rounded-r-md border-l-2 px-3 py-2 text-left text-sm transition-colors',
               isActive
-                ? 'bg-[#c4825a]/12 text-[#7a4a2b]'
+                ? 'border-accent bg-accent/10 text-accent-deep'
                 : m.ready
-                  ? 'text-gray-600 hover:bg-gray-100'
-                  : 'cursor-not-allowed text-gray-300',
+                  ? 'border-transparent text-ink2 hover:bg-card'
+                  : 'cursor-not-allowed border-transparent text-gray-300',
             ].join(' ')}
             aria-current={isActive ? 'page' : undefined}
           >

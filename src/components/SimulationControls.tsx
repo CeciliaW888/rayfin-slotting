@@ -21,7 +21,7 @@ export function SimulationControls({
     return (
       <button
         onClick={onSimulate}
-        className="w-full rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors"
+        className="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accent-deep transition-colors"
       >
         Simulate optimisation
       </button>
@@ -34,8 +34,8 @@ export function SimulationControls({
 
   return (
     <div>
-      <div className="rounded-lg bg-orange-50 border border-orange-200 p-3">
-        <div className="text-sm font-semibold text-orange-900">
+      <div className="rounded-lg bg-accent/8 border border-accent/25 p-3">
+        <div className="text-sm font-semibold text-accent-deep">
           Projected after optimisation
         </div>
         <div className="mt-1 text-sm text-gray-700">
@@ -50,7 +50,7 @@ export function SimulationControls({
         <button
           onClick={onApply}
           disabled={applying}
-          className="flex-1 rounded-lg bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50 transition-colors"
+          className="flex-1 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-white hover:bg-accent-deep disabled:opacity-50 transition-colors"
         >
           {applying ? 'Applying…' : 'Apply to DC'}
         </button>

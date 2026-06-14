@@ -21,17 +21,17 @@ export function IntelligenceSummary({
   ];
 
   return (
-    <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-4">
-      <div className="text-sm font-semibold text-indigo-950">AI differentiators</div>
-      <p className="mt-1 text-xs text-indigo-900/70">
+    <div className="rounded-xl border border-accent/20 bg-accent/5 p-4">
+      <div className="text-sm font-semibold text-accent-deep">AI differentiators</div>
+      <p className="mt-1 text-xs text-ink2">
         Goes beyond static slotting by combining forecast uplift, basket affinity,
         replenishment cube, ergonomics and compatibility constraints.
       </p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         {cards.map((card) => (
-          <div key={card.label} className="rounded-lg bg-white/80 px-3 py-2">
-            <div className="text-sm font-semibold text-gray-900">{card.value}</div>
-            <div className="text-[11px] uppercase tracking-wide text-gray-500">{card.label}</div>
+          <div key={card.label} className="rounded-lg border border-warmborder bg-card px-3 py-2">
+            <div className="font-display text-lg font-semibold text-ink tabular-nums">{card.value}</div>
+            <div className="text-[11px] uppercase tracking-wide text-muted">{card.label}</div>
           </div>
         ))}
       </div>

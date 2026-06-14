@@ -25,13 +25,13 @@ export function WorstSlottedList({
             onClick={() => onSelectSlot(entry.slotId)}
             className={`w-full text-left rounded-lg px-3 py-2 text-sm border transition-colors ${
               selectedSlotId === entry.slotId
-                ? 'border-orange-400 bg-orange-50'
-                : 'border-gray-100 bg-white hover:border-gray-300'
+                ? 'border-accent bg-accent/10'
+                : 'border-warmborder bg-card hover:border-accent/40'
             }`}
           >
-            <span className="font-medium text-gray-900">{entry.sku.code}</span>
-            <span className="text-gray-500"> · {entry.sku.name}</span>
-            <span className="block text-xs text-orange-700">
+            <span className="font-mono font-medium text-ink">{entry.sku.code}</span>
+            <span className="text-ink2"> · {entry.sku.name}</span>
+            <span className="block text-xs text-[#b3472f]">
               wasting ~{Math.round(entry.wasted).toLocaleString()} travel/day
             </span>
           </button>

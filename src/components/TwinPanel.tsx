@@ -24,7 +24,7 @@ function Segmented<T extends string>({
           key={o.id}
           onClick={() => onChange(o.id)}
           className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-            value === o.id ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900'
+            value === o.id ? 'bg-accent/15 text-accent-deep' : 'text-ink2 hover:text-ink'
           }`}
         >
           {o.label}

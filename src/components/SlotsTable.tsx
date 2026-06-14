@@ -70,7 +70,7 @@ export function SlotsTable({
                 <td className="px-3 py-1.5">
                   <span
                     className={`rounded px-1.5 py-0.5 text-xs font-medium ${
-                      sku ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-400'
+                      sku ? 'bg-[#6f9a6a]/15 text-[#4d7049]' : 'bg-page text-muted'
                     }`}
                   >
                     {sku ? 'occupied' : 'empty'}
