@@ -10,10 +10,11 @@ import type { SlotRow } from '@/slotting/types';
 export type CameraMode = 'orbit' | 'walk';
 
 const SELECTED_COLOR = '#ffffff';
-const STEEL = '#8aa0ad';
-const BEAM = '#d58b42';
-const FLOOR = '#dbe8ea';
+const STEEL = '#9aa3ad'; // upright steel
+const BEAM = '#8a8275'; // warm graphite beam (was orange — too close to the accent)
+const FLOOR = '#d9cebd'; // warm matte concrete
 const WALL = '#cdbf9e';
+const COLUMN = '#7c8694'; // neutral structural column (was teal)
 
 const EYE_HEIGHT = 1.7;
 const WALK_SPEED = 7; // units/second
@@ -183,12 +184,12 @@ function TravelNetwork() {
       {/* main cross-aisle and pick path guides */}
       <mesh position={[10, 0.035, 3.7]}>
         <boxGeometry args={[18.5, 0.05, 0.22]} />
-        <meshStandardMaterial color="#2563eb" emissive="#1d4ed8" emissiveIntensity={0.18} />
+        <meshStandardMaterial color="#9aa7b3" roughness={0.9} />
       </mesh>
       {[3, 6, 9, 12].map((z) => (
         <mesh key={z} position={[0.95, 0.04, z]} rotation={[0, 0, 0]}>
           <boxGeometry args={[0.22, 0.05, 1.6]} />
-          <meshStandardMaterial color="#2563eb" emissive="#1d4ed8" emissiveIntensity={0.18} />
+          <meshStandardMaterial color="#9aa7b3" roughness={0.9} />
         </mesh>
       ))}
       {[5.5, 10.5, 15.5].map((x) => (
@@ -207,11 +208,11 @@ function TravelNetwork() {
 function BuildingShell({ showWalls }: { showWalls: boolean }) {
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[10, 0, 8]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[10, 0, 8]} receiveShadow>
         <planeGeometry args={[24, 20]} />
-        <meshStandardMaterial color={FLOOR} roughness={0.9} />
+        <meshStandardMaterial color={FLOOR} roughness={1} metalness={0} />
       </mesh>
-      <gridHelper args={[24, 24, '#9fb6bf', '#cad7dc']} position={[10, 0.012, 8]} />
+      <gridHelper args={[24, 24, '#c2b6a3', '#d6ccbd']} position={[10, 0.012, 8]} />
 
       {/* Perimeter walls box the camera in, so they're optional — off by default
           to keep the aisles visible when orbiting or walking through. */}
@@ -235,9 +236,9 @@ function BuildingShell({ showWalls }: { showWalls: boolean }) {
       {/* blue structural columns, visible along the warehouse aisle */}
       {[3.2, 8.8, 14.4, 20].map((x) =>
         [4.8, 13.6].map((z) => (
-          <mesh key={`${x}-${z}`} position={[x, 2.2, z]}>
+          <mesh key={`${x}-${z}`} position={[x, 2.2, z]} castShadow>
             <boxGeometry args={[0.35, 4.4, 0.35]} />
-            <meshStandardMaterial color="#3792ad" />
+            <meshStandardMaterial color={COLUMN} roughness={0.7} metalness={0.1} />
           </mesh>
         ))
       )}
@@ -286,13 +287,15 @@ function RackSlot({
     <group position={[slot.x, slot.level * 1.05, slot.y + zOffset]}>
       {/* coloured SKU/location face */}
       <mesh
+        castShadow
+        receiveShadow
         onClick={(e) => {
           e.stopPropagation();
           onSelectSlot(slot.id);
         }}
       >
         <boxGeometry args={[1.52, 0.82, 0.2]} />
-        <meshStandardMaterial color={panelColor} roughness={0.55} />
+        <meshStandardMaterial color={panelColor} roughness={0.62} metalness={0.04} />
       </mesh>
 
       {/* white location label strip, like rendered rack faces */}
@@ -302,9 +305,9 @@ function RackSlot({
       </mesh>
 
       {/* pallet/tote depth behind the face */}
-      <mesh position={[0, -0.03, -0.22]}>
+      <mesh position={[0, -0.03, -0.22]} castShadow>
         <boxGeometry args={[1.46, 0.72, 0.46]} />
-        <meshStandardMaterial color={panelColor === EMPTY_COLOR ? '#f3eadf' : panelColor} transparent opacity={0.78} />
+        <meshStandardMaterial color={panelColor === EMPTY_COLOR ? '#f3eadf' : panelColor} roughness={0.8} transparent opacity={0.82} />
       </mesh>
 
       {/* selected outline */}
@@ -337,35 +340,21 @@ function RackStructure({ slots }: { slots: SlotRow[] }) {
         return (
           <group key={run.aisle}>
             {[1.0, 2.05, 3.1].map((y) => (
-              <mesh key={y} position={[centerX, y, run.z]}>
+              <mesh key={y} position={[centerX, y, run.z]} castShadow>
                 <boxGeometry args={[width, 0.08, 0.12]} />
-                <meshStandardMaterial color={BEAM} />
+                <meshStandardMaterial color={BEAM} roughness={0.6} metalness={0.2} />
               </mesh>
             ))}
             {Array.from({ length: Math.round(width / 2) + 1 }, (_, i) => run.minX - 1 + i * 2).map((x) => (
-              <mesh key={x} position={[x, 1.85, run.z]}>
+              <mesh key={x} position={[x, 1.85, run.z]} castShadow>
                 <boxGeometry args={[0.08, 2.55, 0.16]} />
-                <meshStandardMaterial color={STEEL} />
+                <meshStandardMaterial color={STEEL} roughness={0.55} metalness={0.25} />
               </mesh>
             ))}
             <LabelSprite text={`AISLE ${run.aisle}`} position={[run.minX - 1.4, 3.75, run.z]} scale={[1.6, 0.48, 1]} />
           </group>
         );
       })}
-    </group>
-  );
-}
-
-function MiniOverheadHeatmap({ slots, colorById }: { slots: SlotRow[]; colorById: Map<string, string> }) {
-  return (
-    <group position={[0, 4.8, 0]}>
-      <LabelSprite text="OVERHEAD HEATMAP" position={[10, 1.4, 15.8]} scale={[3.8, 0.62, 1]} color="#111827" />
-      {slots.map((slot) => (
-        <mesh key={`map-${slot.id}`} position={[slot.x, 0.05, slot.y + 5.5]}>
-          <boxGeometry args={[1.35, 0.08, 0.75]} />
-          <meshStandardMaterial color={colorById.get(slot.id) ?? EMPTY_COLOR} transparent opacity={0.82} />
-        </mesh>
-      ))}
     </group>
   );
 }
@@ -389,13 +378,30 @@ export function WarehouseScene({
   return (
     <Canvas
       camera={walking ? { position: [0, EYE_HEIGHT, 4.5], fov: 72 } : { position: [19, 10, 22], fov: 45 }}
-      shadows
+      shadows="soft"
       dpr={[1, 1.8]}
+      gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.06 }}
     >
-      <color attach="background" args={['#eef2f4']} />
-      <ambientLight intensity={0.75} />
-      <directionalLight position={[8, 18, 8]} intensity={0.85} castShadow />
-      <pointLight position={[10, 7, 4]} intensity={0.45} />
+      {/* Warm field under the white panel; fog lets far aisles recede for depth. */}
+      <color attach="background" args={['#ece4d8']} />
+      <fog attach="fog" args={['#e4dccf', 30, 66]} />
+
+      {/* One key directional (soft contact shadows) + a warm hemisphere fill. */}
+      <hemisphereLight args={['#fff6e9', '#a89a85', 0.5]} />
+      <ambientLight intensity={0.22} />
+      <directionalLight
+        position={[12, 20, 9]}
+        intensity={1.15}
+        castShadow
+        shadow-mapSize={[2048, 2048]}
+        shadow-camera-near={1}
+        shadow-camera-far={64}
+        shadow-camera-left={-18}
+        shadow-camera-right={18}
+        shadow-camera-top={18}
+        shadow-camera-bottom={-18}
+        shadow-bias={-0.0004}
+      />
       {walking ? <WalkControls /> : <CameraControls tx={10} ty={1.7} tz={8} />}
 
       <BuildingShell showWalls={showWalls} />
@@ -413,8 +419,6 @@ export function WarehouseScene({
           onSelectSlot={onSelectSlot}
         />
       ))}
-
-      {!walking && <MiniOverheadHeatmap slots={slots} colorById={colorById} />}
     </Canvas>
   );
 }
